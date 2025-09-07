@@ -450,9 +450,13 @@
       const hearts = state.lives>0 ? '❤️'.repeat(state.lives) : '—';
       elSummaryTime.innerHTML = `${ts} • Pozostałe życia: <b>${state.lives}</b> ${hearts}`;
 
-      // Dowcip nad przyciskiem Restart
-      const joke = JOKES_PL[Math.floor(Math.random()*JOKES_PL.length)];
-      elJoke.textContent = joke;
+      // Dowcip tylko gdy sukces; przy porażce — smutna minka i żart dopiero po wygranej
+      if (completed) {
+        const joke = JOKES_PL[Math.floor(Math.random()*JOKES_PL.length)];
+        elJoke.textContent = joke;
+      } else {
+        elJoke.innerHTML = '😿 Dziś bez żartu — <b>żarty są dla zwycięzców</b>. Wróć po uśmiech w następnej rundzie!';
+      }
 
       // Lista odpowiedzi (wyśrodkowana, ale wyrównanie tekstu do lewej)
       const list = document.createElement('ol');
