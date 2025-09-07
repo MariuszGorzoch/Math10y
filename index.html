@@ -80,6 +80,7 @@
     .sumMeta{font-size:14px; color:var(--muted); text-align:center}
     .sumList{width:100%; max-width:720px; flex:1; overflow:auto; -webkit-overflow-scrolling:touch}
     .sumActions{width:100%; display:flex; justify-content:center}
+    .jokeBox{max-width:720px; width:100%; text-align:center; background:#0a1a33; border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px 12px; box-shadow:0 6px 18px rgba(5,12,28,.35); font-size:14px; color:var(--text)}
     #answersList .ok{color:var(--good); font-weight:700}
     #answersList .no{color:var(--bad); font-weight:700}
 
@@ -141,6 +142,7 @@
       <div class="sumList">
         <div id="answersList" class="small"></div>
       </div>
+      <div id="jokeBox" class="jokeBox" aria-live="polite"></div>
       <div class="sumActions">
         <button class="btn primary" id="againBtn">Zagraj ponownie</button>
       </div>
@@ -228,6 +230,21 @@
 
     function shuffleArray(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
 
+    // Krótkie polskie dowcipy (źródła: patrz rozmowa)
+    const JOKES_PL = [
+      'Co mówi dżem, gdy się go otwiera? – Dżem dobry.',
+      'Jak nazywa się lekarz, który leczy pandy? – Pandoktor.',
+      'Co zabiera informatyk na turniej rycerski? – Kopię zapasową.',
+      'W górach ceny są wysokie, a nad morzem – słone.',
+      'Jak się nazywa kot, który leci? – Kotlecik!',
+      'Jak się nazywa mina na powitanie? – Witamina!',
+      'Co robi traktor u fryzjera? – Warkocze!',
+      'Mama: „Nie możesz zjeść trzech deserów pod rząd.” Jaś: „Ale ja je jem pod skosem.”',
+      'Pani pyta: „Co to jest echo?” Jaś: „Uczeń, który zawsze powtarza po innych.”',
+      'Dziewczynka: „Poproszę lizaka za dwa złote.” Sprzedawca: „Nie mamy.” Dziewczynka: „A za ile macie?”',
+      '– Umiem liczyć do pięciu. – To policz. – Dwa, trzy, cztery, pięć. – A gdzie jedynka? – W dzienniczku.'
+    ];
+
     let QUESTIONS = buildQuestions();
     let order = shuffleArray([...Array(QUESTIONS.length).keys()]);
     let state = { idx:0, score:0, lives:3, locked:false, selected:null, log:[] };
@@ -251,6 +268,7 @@
     const elAnswersList = document.getElementById('answersList');
     const elSummaryTitle = document.getElementById('summaryTitle');
     const elSummaryTime = document.getElementById('summaryTime');
+    const elJoke = document.getElementById('jokeBox');
 
     function updateHUD(){
       const total = QUESTIONS.length;
@@ -431,6 +449,10 @@
       const ts = new Date().toLocaleString('pl-PL');
       const hearts = state.lives>0 ? '❤️'.repeat(state.lives) : '—';
       elSummaryTime.innerHTML = `${ts} • Pozostałe życia: <b>${state.lives}</b> ${hearts}`;
+
+      // Dowcip nad przyciskiem Restart
+      const joke = JOKES_PL[Math.floor(Math.random()*JOKES_PL.length)];
+      elJoke.textContent = joke;
 
       // Lista odpowiedzi (wyśrodkowana, ale wyrównanie tekstu do lewej)
       const list = document.createElement('ol');
