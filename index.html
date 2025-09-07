@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Kosmiczna Misja Stisia — gra matematyczna</title>
+  <style>
+    :root{
+      --bg:#0b1220;--card:#111a2e;--accent:#6cf;--accent2:#9ff;--good:#34d399;--bad:#ef4444;--text:#e6f0ff;--muted:#9bb3d1;--star:#ffe27a
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 70% -10%, #1b2a4b 0%, var(--bg) 60%),
+                  radial-gradient(900px 600px at -10% 110%, #12203a 0%, var(--bg) 60%);
+      color:var(--text);
+      overflow:hidden;
+    }
+    .stars{position:fixed; inset:0; pointer-events:none; z-index:-1}
+    .star{position:absolute; width:2px; height:2px; background:var(--star); opacity:.8; border-radius:50%;
+          animation: twinkle 2.5s infinite ease-in-out}
+    @keyframes twinkle{ 0%,100%{opacity:.15; transform:scale(.7)} 50%{opacity:.9; transform:scale(1)} }
+
+    .container{width:100%; max-width:980px; margin:0 auto; padding:calc(10px + env(safe-area-inset-top)) 12px calc(10px + env(safe-area-inset-bottom)) 12px; min-height:100dvh; display:flex; flex-direction:column; gap:10px}
+    header{display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+    .titleBox{display:flex; align-items:center; gap:10px}
+    .mascot{width:60px; height:60px; border-radius:50%; background:
+        radial-gradient(circle at 30% 35%, #8ce0ff 0 35%, #5cc7ff 36% 60%, #1e90ff 61% 100%);
+      position:relative; box-shadow:0 6px 18px rgba(0,0,0,.35); animation:float 3s ease-in-out infinite}
+    .mascot:before, .mascot:after{content:""; position:absolute; background:#fff; border-radius:50%}
+    .mascot:before{width:12px;height:12px; left:16px; top:22px; box-shadow:18px 0 0 #fff}
+    .mascot:after{width:6px; height:6px; left:20px; top:26px; box-shadow:18px 0 0 #0000, 18px 0 0 #0b3a6b}
+    .ear{position:absolute; width:16px; height:30px; background:linear-gradient(#62b6ff,#1e90ff); border-radius:12px 12px 2px 2px; top:-12px}
+    .ear.left{left:-6px; transform:rotate(-15deg)}
+    .ear.right{right:-6px; transform:rotate(15deg)}
+    .title{font-size: clamp(18px, 2.6vw, 30px); font-weight:800; letter-spacing:.2px}
+
+    .panel{background:var(--card); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:14px; box-shadow:0 10px 26px rgba(5,12,28,.45)}
+
+    .hud{display:grid; grid-template-columns:1fr auto auto; gap:8px; align-items:center}
+    .progress{height:10px; background:#0a1428; border:1px solid rgba(255,255,255,.07); border-radius:999px; overflow:hidden}
+    .progress > i{display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .35s ease}
+    .badge{padding:8px 10px; border-radius:999px; background:#0b1630; border:1px solid rgba(255,255,255,.08); font-weight:600}
+
+    main{margin:0; display:flex; flex-direction:column; gap:12px; flex:1; min-height:0}
+    .question{font-size:18px; font-weight:700}
+    .qtitle{color:var(--muted); font-size:14px}
+    .question img{max-width:100%; margin-top:8px; border:1px solid rgba(255,255,255,.1); border-radius:6px}
+    .options{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:6px; flex:1; align-content:start}
+    .btn{padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:#0f1d38; color:var(--text);
+      cursor:pointer; font-weight:700; text-align:center; transition: transform .08s ease, border-color .2s, background .2s; user-select:none}
+    .btn:hover{transform:translateY(-2px); border-color:var(--accent)}
+    .btn:active{transform:translateY(0)}
+    .btn.correct{background:rgba(52,211,153,.15); border-color:var(--good)}
+    .btn.wrong{background:rgba(239,68,68,.15); border-color:var(--bad)}
+
+    .speech{display:flex; align-items:flex-start; gap:8px; margin-top:4px}
+    .bubble{background:#0a1a33; border:1px solid rgba(255,255,255,.08); padding:10px 12px; border-radius:12px; max-width:700px}
+    .small{color:var(--muted); font-size:13px}
+
+    .footer{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:auto}
+    .primary{background:linear-gradient(90deg,#34a3ff,#5fe3ff); color:#05223f}
+
+    .hidden{display:none}
+    .shake{animation:shake .38s cubic-bezier(.36,.07,.19,.97) both}
+    @keyframes shake{10%, 90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-4px)}40%,60%{transform:translateX(4px)}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+    .scoreRow{display:flex; gap:6px; align-items:center}
+    .heart{font-size:20px; filter:drop-shadow(0 2px 0 rgba(0,0,0,.25))}
+
+    .celebrate{position:fixed; inset:0; pointer-events:none; z-index:10}
+
+    /* Summary — pełnoekranowo dla screenshota */
+    #summary{position:fixed; inset:0; border-radius:0; display:none; z-index:1000; background:var(--card)}
+    #summary:not(.hidden){display:flex; flex-direction:column; align-items:center; padding:calc(20px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom)); gap:12px}
+    #answersList{font-size:13px; line-height:1.3; background:#0a1428; padding:12px; border-radius:10px; overflow:auto; -webkit-overflow-scrolling:touch; max-height:100%; margin:0 auto; width:100%; max-width:720px}
+    .sumTitle{font-size:28px; font-weight:900; text-align:center}
+    .sumMeta{font-size:14px; color:var(--muted); text-align:center}
+    .sumList{width:100%; max-width:720px; flex:1; overflow:auto; -webkit-overflow-scrolling:touch}
+    .sumActions{width:100%; display:flex; justify-content:center}
+    #answersList .ok{color:var(--good); font-weight:700}
+    #answersList .no{color:var(--bad); font-weight:700}
+
+    .resultIcon{width:84px; height:84px}
+    .flex{display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+
+    @media (max-width: 480px){
+      .title{font-size:20px}
+      .question{font-size:16px}
+      .btn{padding:12px; font-size:16px}
+    }
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+  <div class="container">
+    <header>
+      <div class="titleBox">
+        <div class="mascot" aria-hidden="true">
+          <div class="ear left"></div>
+          <div class="ear right"></div>
+        </div>
+        <div>
+          <div class="title">Kosmiczna Misja Stisia</div>
+          <div class="small">Pomóż niebieskiemu kosmicie Stisiowi zbierać ananasy, rozwiązując zadania z matematyki! 🍍</div>
+        </div>
+      </div>
+      <div class="scoreRow">
+        <span class="badge" id="level">Poziom: 1</span>
+        <span class="badge" id="score">Punkty: 0</span>
+        <span class="badge" id="lives" title="Liczba żyć">❤️❤️❤️</span>
+      </div>
+    </header>
+
+    <div class="panel hud">
+      <div class="progress" aria-label="Postęp gry"><i id="bar"></i></div>
+      <div class="badge" id="qidx">Pytanie 1/10</div>
+      <button class="badge" id="resetBtn" title="Zacznij od nowa">↻ Restart</button>
+    </div>
+
+    <main class="panel" id="game">
+      <div class="question" id="question">…</div>
+      <div class="options" id="options"></div>
+
+      <div class="speech">
+        <div class="mascot" style="width:48px; height:48px"><div class="ear left"></div><div class="ear right"></div></div>
+        <div class="bubble small" id="hint">Kliknij poprawną odpowiedź. Za dobrą odpowiedź: +10 punktów i ananas 🟡. Za błąd tracisz serduszko.</div>
+      </div>
+
+      <div class="footer">
+        <button class="btn primary" id="nextBtn" disabled>Następne ➜</button>
+        <div class="small">Wskazówka: Spróbuj na głos wytłumaczyć, jak liczysz – to pomaga! 🎯</div>
+      </div>
+    </main>
+
+    <section class="panel hidden" id="summary">
+      <div class="sumTitle" id="summaryTitle">—</div>
+      <div class="sumMeta" id="summaryTime">—</div>
+      <div class="sumList">
+        <div id="answersList" class="small"></div>
+      </div>
+      <div class="sumActions">
+        <button class="btn primary" id="againBtn">Zagraj ponownie</button>
+      </div>
+    </section>
+  </div>
+
+  <canvas class="celebrate" id="confetti" width="1920" height="1080"></canvas>
+
+  <script>
+    // --- Małe gwiazdki w tle ---
+    (function makeStars(){
+      const box = document.getElementById('stars');
+      const n = 120;
+      for(let i=0;i<n;i++){
+        const s=document.createElement('i'); s.className='star';
+        s.style.left = Math.random()*100+'%';
+        s.style.top = Math.random()*100+'%';
+        s.style.animationDelay = (Math.random()*2.5)+'s';
+        s.style.opacity = (0.2+Math.random()*0.8).toFixed(2);
+        s.style.transform = `scale(${0.5+Math.random()*1.2})`;
+        box.appendChild(s);
+      }
+    })();
+
+    // === Generatory pytań — nowe losowe liczby na każde uruchomienie ===
+    function ri(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+    function pickFourWithCorrect(correct, pool){
+      // wybierz 3 unikalne błędne z puli, plus poprawną, przetasuj
+      const wrong = [];
+      const seen = new Set([correct]);
+      for(const v of pool){ if(wrong.length>=3) break; if(!seen.has(v) && v>=0){ wrong.push(v); seen.add(v); } }
+      while(wrong.length<3){ const k = correct + ri(-10,10); if(!seen.has(k) && k>=0){ wrong.push(k); seen.add(k); } }
+      const all = [correct,...wrong];
+      return shuffleArray(all).slice(0,4);
+    }
+
+    function buildQuestions(){
+      const qs = [];
+      // 1. Suma
+      { const a=ri(15,45), b=ri(10,35), c=a+b;
+        const opts = pickFourWithCorrect(c,[c-1,c+1,c+10,c-10]);
+        qs.push({ q:`Suma liczb ${a} i ${b} wynosi:`, opts:opts.map(x=>String(x)), correct:opts.indexOf(c) }); }
+
+      // 2. Różnica
+      { const a=ri(30,70), b=ri(10,Math.max(10,a-10)), c=a-b; const opts = pickFourWithCorrect(c,[c-1,c+1,c+5,c+10]);
+        qs.push({ q:`Różnica liczb ${a} i ${b} wynosi:`, opts:opts.map(x=>String(x)), correct:opts.indexOf(c) }); }
+
+      // 3. Zabawki (żołnierze o K mniej)
+      { const cars=ri(10,20), k=ri(3,8); const soldiers=cars-k; const opts = pickFourWithCorrect(soldiers,[soldiers+2,soldiers-2,cars,cars+k]);
+        qs.push({ q:`Wśród zabawek Wojtka jest ${cars} samochodów, a żołnierzy — o ${k} mniej. Żołnierzy jest:`, opts:opts.map(x=>String(x)), correct:opts.indexOf(soldiers) }); }
+
+      // 4. Spodnie — różnica ceny
+      { const j=ri(50,110), z=j+ri(5,30); const diff=z-j; const pool=[diff-2,diff-1,diff+1,diff+3]; const opts = pickFourWithCorrect(diff,pool).map(x=>`${x} zł`);
+        qs.push({ q:`Spodnie Jarka kosztowały ${j} zł, a spodnie Zbyszka — ${z} zł. Spodnie Zbyszka są droższe od spodni Jarka o:`, opts, correct:opts.findIndex(t=>t===`${diff} zł`) }); }
+
+      // 5. Iloczyn
+      { const a=[10,20,30,40][ri(0,3)], b=[10,20,30,40,50,60][ri(0,5)]; const c=a*b; const opts = pickFourWithCorrect(c,[a+b,c/10,c+20,c-20]);
+        qs.push({ q:`Iloczyn liczb ${a} i ${b} wynosi:`, opts:opts.map(x=>String(x)), correct:opts.indexOf(c) }); }
+
+      // 6. Babcia jest r razy starsza
+      { const r=ri(6,9), p=ri(7,12), g=r*p; const opts = pickFourWithCorrect(p,[p-1,p+1,p+2,p+3]).map(x=>`${x} lat`);
+        qs.push({ q:`Babcia Pawła ma ${g} lat i jest od Pawła ${r} razy starsza. Paweł ma:`, opts, correct:opts.findIndex(t=>t===`${p} lat`) }); }
+
+      // 7. Reszta z dzielenia
+      { const A=ri(20,50), B=ri(3,9), r=A%B; const pool=[]; for(let i=0;i<Math.min(6,B);i++){ if(i!==r) pool.push(i); }
+        const opts = pickFourWithCorrect(r,pool).map(x=>String(x));
+        qs.push({ q:`Reszta z dzielenia liczby ${A} przez ${B} wynosi:`, opts, correct:opts.indexOf(String(r)) }); }
+
+      // 8. Kolejność działań ( (A+B):C · D )
+      { const C=[2,3,4,6][ri(0,3)], D=ri(2,5), A=C*ri(3,9), B=C*ri(2,8); const val=((A+B)/C)*D; const opts = pickFourWithCorrect(val,[val- D, val/2, val+ C, val-1]);
+        qs.push({ q:`Wynik działania (${A} + ${B}) : ${C} · ${D} wynosi:`, opts:opts.map(x=>String(x)), correct:opts.indexOf(val) }); }
+
+      // 9. Wiek Zosi i taty
+      { const r=ri(4,6), dziecko=ri(6,10), mama=r*dziecko, T=ri(25,35), tata=dziecko+T; const pool=[tata-1,tata+1,mama, T];
+        const opts = pickFourWithCorrect(tata,pool).map(x=>`${x} lat`);
+        qs.push({ q:`Zosia jest ${r} razy młodsza od swojej mamy, która ma ${mama} lat. Tata Zosi jest od swojej córki o ${T} lat starszy i ma:`, opts, correct:opts.findIndex(t=>t===`${tata} lat`) }); }
+
+      // 10. Oś liczbowa
+      { const max=[60,80,100][ri(0,2)], pt=ri(1,7)* (max/8) | 0; // punkt blisko skali
+        const point = Math.round(pt/5)*5; const pool=[point-10, point-5, point+5, point+10]; const opts = pickFourWithCorrect(point,pool).map(x=>String(x));
+        qs.push({ q:`Współrzędna punktu A na osi liczb wynosi:`, opts, correct:opts.indexOf(String(point)), axis:{min:0,max,point} }); }
+
+      return qs;
+    }
+
+    function shuffleArray(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+
+    let QUESTIONS = buildQuestions();
+    let order = shuffleArray([...Array(QUESTIONS.length).keys()]);
+    let state = { idx:0, score:0, lives:3, locked:false, selected:null, log:[] };
+
+    // --- Elementy ---
+    const elQ = document.getElementById('question');
+    const elOptions = document.getElementById('options');
+    const elNext = document.getElementById('nextBtn');
+    const elBar = document.getElementById('bar');
+    const elQIdx = document.getElementById('qidx');
+    const elLvl = document.getElementById('level');
+    const elScore = document.getElementById('score');
+    const elLives = document.getElementById('lives');
+    const elHint = document.getElementById('hint');
+    const elReset = document.getElementById('resetBtn');
+    const elSummary = document.getElementById('summary');
+    const elGame = document.getElementById('game');
+    const elSummaryText = document.getElementById('summaryText');
+    const elAgain = document.getElementById('againBtn');
+    const elShowAnswers = document.getElementById('showAnswersBtn');
+    const elAnswersList = document.getElementById('answersList');
+    const elSummaryTitle = document.getElementById('summaryTitle');
+    const elSummaryTime = document.getElementById('summaryTime');
+
+    function updateHUD(){
+      const total = QUESTIONS.length;
+      elQIdx.textContent = `Pytanie ${state.idx+1}/${total}`;
+      elBar.style.width = `${((state.idx)/total)*100}%`;
+      elScore.textContent = `Punkty: ${state.score}`;
+      elLvl.textContent = `Poziom: ${1 + Math.floor(state.score/30)}`;
+      elLives.textContent = '❤️'.repeat(state.lives) || '—';
+    }
+
+    function createAxisSVG({min,max,point}){
+      const width = 360, height = 60, margin = 20;
+      const axisW = width - margin*2;
+      const x = v => margin + ( (v - min) / (max - min) ) * axisW;
+      const tickStep = (max-min)/5;
+      const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.setAttribute('viewBox',`0 0 ${width} ${height}`);
+      svg.setAttribute('width','100%');
+      // baseline
+      const line = document.createElementNS(svg.namespaceURI,'line');
+      line.setAttribute('x1',margin); line.setAttribute('x2',width-margin);
+      line.setAttribute('y1',height/2); line.setAttribute('y2',height/2);
+      line.setAttribute('stroke','#cfe8ff'); line.setAttribute('stroke-width','2');
+      svg.appendChild(line);
+      // arrow
+      const arr = document.createElementNS(svg.namespaceURI,'polygon');
+      arr.setAttribute('points', `${width-margin},${height/2-4} ${width-margin},${height/2+4} ${width-margin+12},${height/2}`);
+      arr.setAttribute('fill','#cfe8ff');
+      svg.appendChild(arr);
+      // ticks & labels
+      for(let v=min; v<=max; v+=tickStep){
+        const lx = x(v);
+        const tick = document.createElementNS(svg.namespaceURI,'line');
+        tick.setAttribute('x1',lx); tick.setAttribute('x2',lx);
+        tick.setAttribute('y1',height/2-10); tick.setAttribute('y2',height/2+10);
+        tick.setAttribute('stroke','#cfe8ff'); tick.setAttribute('stroke-width','2');
+        svg.appendChild(tick);
+        const lbl = document.createElementNS(svg.namespaceURI,'text');
+        lbl.setAttribute('x',lx); lbl.setAttribute('y',height-6);
+        lbl.setAttribute('fill','#e6f0ff'); lbl.setAttribute('font-size','12');
+        lbl.setAttribute('text-anchor','middle');
+        lbl.textContent = Math.round(v).toString();
+        svg.appendChild(lbl);
+      }
+      // point A
+      const dot = document.createElementNS(svg.namespaceURI,'circle');
+      dot.setAttribute('cx', x(point)); dot.setAttribute('cy', height/2);
+      dot.setAttribute('r','4'); dot.setAttribute('fill','#ffb24a');
+      svg.appendChild(dot);
+      const label = document.createElementNS(svg.namespaceURI,'text');
+      label.setAttribute('x', x(point)); label.setAttribute('y', 16);
+      label.setAttribute('fill','#e6f0ff'); label.setAttribute('font-size','14');
+      label.setAttribute('text-anchor','middle'); label.textContent='A';
+      svg.appendChild(label);
+      return svg;
+    }
+
+    function renderQuestion(){
+      updateHUD();
+      elOptions.innerHTML = '';
+      const qIndex = order[state.idx];
+      const data = QUESTIONS[qIndex];
+      elQ.innerHTML = `<span class="qtitle">Zadanie ${state.idx+1}:</span><br>${data.q}`; // dwukropek po numerze
+      // jeśli to oś liczbowa — dorysuj
+      if(data.axis){
+        const wrap = document.createElement('div');
+        wrap.style.marginTop = '8px';
+        wrap.appendChild(createAxisSVG(data.axis));
+        elQ.appendChild(wrap);
+      }
+      // przygotuj opcje
+      const indexed = data.opts.map((text,i)=>({text, i, correct:i===data.correct}));
+      shuffleArray(indexed);
+      indexed.forEach((opt)=>{
+        const b = document.createElement('button');
+        b.className='btn';
+        b.textContent=opt.text;
+        b.setAttribute('data-correct', opt.correct ? '1':'0');
+        b.onclick = ()=> chooseAnswer(b, opt, data);
+        elOptions.appendChild(b);
+      });
+      elNext.disabled = true;
+      elHint.textContent = 'Kliknij poprawną odpowiedź. Głośno wytłumacz swój sposób liczenia!';
+      state.selected=null; state.locked=false;
+    }
+
+    function chooseAnswer(btn, opt, data){
+      if(state.locked) return;
+      state.locked = true; state.selected = btn;
+      const buttons = [...document.querySelectorAll('#options .btn')];
+      buttons.forEach(b => b.disabled = true);
+      const correctBtn = buttons.find(b=>b.dataset.correct==='1');
+      const chosenText = btn.textContent; const correctText = correctBtn?correctBtn.textContent:'';
+      let isCorrect=false;
+      if(opt.correct){
+        btn.classList.add('correct');
+        state.score += 10;
+        elHint.textContent = 'Brawo! Stiś znalazł ananasa! 🍍 +10 punktów';
+        confetti();
+        isCorrect=true;
+      } else {
+        btn.classList.add('wrong');
+        state.lives -= 1;
+        elHint.textContent = 'Ups! Tym razem nie. Spróbuj stosować kolejność działań albo policz na brudno.';
+        elGame.classList.add('shake'); setTimeout(()=>elGame.classList.remove('shake'), 420);
+        if(correctBtn) correctBtn.classList.add('correct');
+        if(state.lives<=0){
+          state.log.push({ no: state.idx+1, q:data.q, chosen:chosenText, correct:correctText, ok:false });
+          endGame(false);
+          return;
+        }
+      }
+      state.log.push({ no: state.idx+1, q:data.q, chosen:chosenText, correct:correctText, ok:isCorrect });
+
+      // AUTO-FINISH on last question to make mobile flow easier
+      if(state.idx === QUESTIONS.length-1){
+        elNext.disabled = true;
+        updateHUD();
+        setTimeout(()=> endGame(true), 650);
+      } else {
+        elNext.disabled = false;
+        updateHUD();
+      }
+    }
+
+    function next(){
+      if(state.idx < QUESTIONS.length-1){ state.idx++; renderQuestion(); }
+      else { endGame(true); }
+    }
+
+    function funnySVG(ok){
+      // śmieszny ananas z okularami przeciwsłonecznymi (inline SVG autorskie)
+      const color = ok? '#34d399' : '#ef4444';
+      return `
+      <svg width="180" height="160" viewBox="0 0 180 160" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#ffe08a"/>
+            <stop offset="100%" stop-color="#ffb24a"/>
+          </linearGradient>
+        </defs>
+        <g transform="translate(10,5)">
+          <polygon points="80,0 70,20 90,20" fill="#5bd37e"/>
+          <polygon points="60,10 50,30 70,30" fill="#45c06a"/>
+          <polygon points="100,10 90,30 110,30" fill="#45c06a"/>
+          <ellipse cx="80" cy="95" rx="55" ry="55" fill="url(#g1)" stroke="#e39b2d" stroke-width="3"/>
+          <rect x="38" y="70" width="84" height="22" rx="10" fill="#0b1220" stroke="#6cf" stroke-width="3"/>
+          <circle cx="58" cy="81" r="8" fill="#12203a" stroke="#6cf" stroke-width="3"/>
+          <circle cx="102" cy="81" r="8" fill="#12203a" stroke="#6cf" stroke-width="3"/>
+          <path d="M55 110 Q80 125 105 110" stroke="${color}" stroke-width="6" fill="none" stroke-linecap="round"/>
+        </g>
+      </svg>`;
+    }
+
+    function resultSVG(ok){
+      if(ok){
+        return `<svg viewBox='0 0 96 96' width='84' height='84' xmlns='http://www.w3.org/2000/svg'>
+          <defs><linearGradient id='gg' x1='0' x2='0' y1='0' y2='1'><stop offset='0%' stop-color='#5ff2b0'/><stop offset='100%' stop-color='#34d399'/></linearGradient></defs>
+          <circle cx='48' cy='48' r='44' fill='url(#gg)' stroke='#0b3a2a' stroke-width='4'/>
+          <path d='M28 50 L42 64 L70 36' fill='none' stroke='#05223f' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/>
+        </svg>`;
+      }
+      return `<svg viewBox='0 0 96 96' width='84' height='84' xmlns='http://www.w3.org/2000/svg'>
+        <defs><linearGradient id='rg' x1='0' x2='0' y1='0' y2='1'><stop offset='0%' stop-color='#ff8a8a'/><stop offset='100%' stop-color='#ef4444'/></linearGradient></defs>
+        <circle cx='48' cy='48' r='44' fill='url(#rg)' stroke='#3a0b0b' stroke-width='4'/>
+        <path d='M32 32 L64 64 M64 32 L32 64' stroke='#05223f' stroke-width='8' stroke-linecap='round'/>
+      </svg>`;
+    }
+
+    function endGame(completed){
+      const total=QUESTIONS.length; const percent=Math.round((state.score/(total*10))*100);
+      document.getElementById('bar').style.width = '100%';
+      elGame.classList.add('hidden');
+      elSummary.classList.remove('hidden');
+
+      // Ustaw tytuł (sukces/porażka) i czas
+      elSummaryTitle.textContent = completed ? 'SUKCES! 🎉' : 'NIE ZALICZONO 😿';
+      const ts = new Date().toLocaleString('pl-PL');
+      const hearts = state.lives>0 ? '❤️'.repeat(state.lives) : '—';
+      elSummaryTime.innerHTML = `${ts} • Pozostałe życia: <b>${state.lives}</b> ${hearts}`;
+
+      // Lista odpowiedzi (wyśrodkowana, ale wyrównanie tekstu do lewej)
+      const list = document.createElement('ol');
+      list.style.margin = '0';
+      list.style.paddingLeft = '18px';
+      state.log.forEach(item=>{
+        const li = document.createElement('li');
+        li.style.margin = '8px 0';
+        li.style.textAlign = 'left';
+        const mark = item.ok ? '<span class="ok">✔ poprawnie</span>' : '<span class="no">✖ błędnie</span>';
+        li.innerHTML = `<div><strong>Zadanie ${item.no}:</strong> ${item.q}</div>
+                        <div>Wybrano: <b>${item.chosen||'—'}</b> &nbsp;•&nbsp; Poprawna: <b>${item.correct}</b> &nbsp;${mark}</div>`;
+        list.appendChild(li);
+      });
+      elAnswersList.innerHTML='';
+      elAnswersList.appendChild(list);
+
+      // Tekst nad listą
+      elSummaryText && (elSummaryText.textContent = completed
+        ? `Misja zakończona! Stiś jest dumny! 🚀`
+        : `Koniec żyć. Spróbuj ponownie — wierzymy w Ciebie! 💪`);
+    }
+
+    function restart(){
+      QUESTIONS = buildQuestions();
+      order = shuffleArray([...Array(QUESTIONS.length).keys()]);
+      state = { idx:0, score:0, lives:3, locked:false, selected:null, log:[] };
+      elSummary.classList.add('hidden');
+      elAnswersList.innerHTML='';
+      elGame.classList.remove('hidden');
+      renderQuestion();
+    }
+
+    document.getElementById('nextBtn').addEventListener('click', next);
+    document.getElementById('resetBtn').addEventListener('click', restart);
+    document.getElementById('againBtn').addEventListener('click', restart);
+
+    function confetti(){
+      const c = document.getElementById('confetti');
+      const ctx = c.getContext('2d');
+      const W = c.width = window.innerWidth; const H = c.height = window.innerHeight;
+      const pieces = Array.from({length: 80}, () => ({
+        x: Math.random()*W, y: -20, r: 2 + Math.random()*4,
+        vx: -1 + Math.random()*2, vy: 2 + Math.random()*3,
+        rot: Math.random()*Math.PI, vr: -0.2 + Math.random()*0.4
+      }));
+      const start = performance.now();
+      (function tick(now){
+        const t = now - start; ctx.clearRect(0,0,W,H);
+        pieces.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle = `hsl(${(p.x/W)*360}, 90%, 60%)`; ctx.fillRect(-p.r,-p.r,p.r*2,p.r*2); ctx.restore(); });
+        if(t<550) requestAnimationFrame(tick); else ctx.clearRect(0,0,W,H);
+      })(start);
+    }
+
+    // Start gry
+    renderQuestion();
+  </script>
+</body>
+</html>
