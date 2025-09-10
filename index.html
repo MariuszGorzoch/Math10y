@@ -25,15 +25,8 @@
     .container{width:100%; max-width:980px; margin:0 auto; padding:calc(10px + env(safe-area-inset-top)) 12px calc(10px + env(safe-area-inset-bottom)) 12px; min-height:100dvh; display:flex; flex-direction:column; gap:10px}
     header{display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap}
     .titleBox{display:flex; align-items:center; gap:10px}
-    .mascot{width:60px; height:60px; border-radius:50%; background:
-        radial-gradient(circle at 30% 35%, #8ce0ff 0 35%, #5cc7ff 36% 60%, #1e90ff 61% 100%);
-      position:relative; overflow:hidden; box-shadow:0 6px 18px rgba(0,0,0,.35); animation:float 3s ease-in-out infinite}
-    .mascot:before, .mascot:after{content:""; position:absolute; border-radius:50%}
-    .mascot:before{width:12px;height:12px; left:16px; top:22px; background:#fff; box-shadow:18px 0 0 #fff}
-    .mascot:after{width:6px; height:6px; left:20px; top:26px; background:#0b3a6b; box-shadow:18px 0 0 #0b3a6b}
-    .ear{position:absolute; width:16px; height:30px; background:linear-gradient(#62b6ff,#1e90ff); border-radius:12px 12px 2px 2px; top:-12px}
-    .ear.left{left:-6px; transform:rotate(-15deg)}
-    .ear.right{right:-6px; transform:rotate(15deg)}
+    .mascot{width:60px; height:60px; border-radius:50%; object-fit:cover;
+      box-shadow:0 6px 18px rgba(0,0,0,.35); animation:float 3s ease-in-out infinite}
     .title{font-size: clamp(18px, 2.6vw, 30px); font-weight:800; letter-spacing:.2px}
 
     .panel{background:var(--card); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:14px; box-shadow:0 10px 26px rgba(5,12,28,.45)}
@@ -99,10 +92,7 @@
   <div class="container">
     <header>
       <div class="titleBox">
-        <div class="mascot" aria-hidden="true">
-          <div class="ear left"></div>
-          <div class="ear right"></div>
-        </div>
+        <img class="mascot" src="https://www.icegif.com/wp-content/uploads/2023/03/icegif-1388.gif" alt="Stiś" />
         <div>
           <div class="title">Kosmiczna Misja Stisia</div>
           <div class="small">Pomóż niebieskiemu kosmicie Stisiowi zbierać ananasy, rozwiązując zadania z matematyki! 🍍</div>
@@ -126,7 +116,7 @@
       <div class="options" id="options"></div>
 
       <div class="speech">
-        <div class="mascot" style="width:48px; height:48px"><div class="ear left"></div><div class="ear right"></div></div>
+        <img class="mascot" style="width:48px; height:48px" src="https://www.icegif.com/wp-content/uploads/2023/03/icegif-1388.gif" alt="Stiś" />
         <div class="bubble small" id="hint">Kliknij poprawną odpowiedź. Za dobrą odpowiedź: +10 punktów i ananas 🟡. Za błąd tracisz serduszko.</div>
       </div>
 
