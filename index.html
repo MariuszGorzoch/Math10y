@@ -71,6 +71,11 @@
 
     .celebrate{position:fixed; inset:0; pointer-events:none; z-index:10}
 
+    /* Silly rocket & boom */
+    .rocket{position:fixed; top:0; left:0; font-size:32px; z-index:999; pointer-events:none; transition:transform 3s linear}
+    .boom{position:fixed; font-size:48px; pointer-events:none; transform:translate(-50%,-50%) scale(.2); animation:boom .7s ease-out forwards; z-index:999}
+    @keyframes boom{to{transform:translate(-50%,-50%) scale(1.6); opacity:0}}
+
     /* Summary — pełnoekranowo dla screenshota */
     #summary{position:fixed; inset:0; border-radius:0; display:none; z-index:1000; background:var(--card)}
     #summary:not(.hidden){display:flex; flex-direction:column; align-items:center; padding:calc(20px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom)); gap:12px}
@@ -603,9 +608,37 @@
       (function tick(now){
         const t = now - start; ctx.clearRect(0,0,W,H);
         pieces.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle = `hsl(${(p.x/W)*360}, 90%, 60%)`; ctx.fillRect(-p.r,-p.r,p.r*2,p.r*2); ctx.restore(); });
-        if(t<550) requestAnimationFrame(tick); else ctx.clearRect(0,0,W,H);
+      if(t<550) requestAnimationFrame(tick); else ctx.clearRect(0,0,W,H);
       })(start);
     }
+
+    // Random rocket antics
+    function spawnRocket(){
+      const r=document.createElement('div');
+      r.className='rocket';
+      r.textContent='🚀';
+      document.body.appendChild(r);
+      const startX=Math.random()*window.innerWidth;
+      const targetX=Math.random()*window.innerWidth;
+      const targetY=Math.random()*window.innerHeight;
+      r.style.transform=`translate(${startX}px,-60px) rotate(90deg)`;
+      r.offsetWidth;
+      r.style.transform=`translate(${targetX}px,${targetY}px) rotate(135deg)`;
+      r.addEventListener('transitionend',()=>{r.remove(); boom(targetX,targetY);},{once:true});
+    }
+    function boom(x,y){
+      const b=document.createElement('div');
+      b.className='boom';
+      b.textContent='💥';
+      b.style.left=`${x}px`;
+      b.style.top=`${y}px`;
+      document.body.appendChild(b);
+      setTimeout(()=>b.remove(),700);
+    }
+    (function rocketLoop(){
+      const delay=5000+Math.random()*10000;
+      setTimeout(()=>{spawnRocket(); rocketLoop();},delay);
+    })();
 
     // Start gry
     renderQuestion();
