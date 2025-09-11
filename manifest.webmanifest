@@ -1,7 +1,8 @@
 {
   "name": "Kosmiczna Misja Stisia",
   "short_name": "Stisia",
-  "start_url": "/",
+  "start_url": "/Math10y/",
+  "scope": "/Math10y/",
   "display": "standalone",
   "background_color": "#0b1220",
   "theme_color": "#0b1220",
