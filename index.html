@@ -357,7 +357,7 @@
 
     let QUESTIONS = buildQuestions();
     let order = shuffleArray([...Array(QUESTIONS.length).keys()]);
-    let state = { idx:0, score:0, lives:3, locked:false, selected:null, log:[] };
+    let state = { idx:0, score:0, lives:3, locked:false, selected:null, log:[], startTime: Date.now() };
 
     // --- Elementy ---
     const elQ = document.getElementById('question');
@@ -588,12 +588,28 @@
       elSummaryText && (elSummaryText.textContent = completed
         ? `Misja zakończona! Stiś jest dumny! 🚀`
         : `Koniec żyć. Spróbuj ponownie — wierzymy w Ciebie! 💪`);
+
+      if (completed) {
+        const playerName = prompt('Podaj swoje imię:') || 'Anonim';
+        const payload = {
+          game: 'Math10y',
+          playerName,
+          playerIcon: 'stitch.png',
+          score: state.score,
+          timeMs: Date.now() - state.startTime
+        };
+        fetch('https://mgxscoreapi-dgbzagg8dkdpd3b9.canadacentral-01.azurewebsites.net/score', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).catch(err => console.error('Błąd zapisu wyniku', err));
+      }
     }
 
     function restart(){
       QUESTIONS = buildQuestions();
       order = shuffleArray([...Array(QUESTIONS.length).keys()]);
-      state = { idx:0, score:0, lives:3, locked:false, selected:null, log:[] };
+      state = { idx:0, score:0, lives:3, locked:false, selected:null, log:[], startTime: Date.now() };
       elSummary.classList.add('hidden');
       elAnswersList.innerHTML='';
       elGame.classList.remove('hidden');
