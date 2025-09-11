@@ -621,9 +621,10 @@
       const startX=Math.random()*window.innerWidth;
       const targetX=Math.random()*window.innerWidth;
       const targetY=Math.random()*window.innerHeight;
-      r.style.transform=`translate(${startX}px,-60px) rotate(90deg)`;
+      const angle=Math.atan2(targetY+60,targetX-startX)*180/Math.PI;
+      r.style.transform=`translate(${startX}px,-60px) rotate(${angle}deg)`;
       r.offsetWidth;
-      r.style.transform=`translate(${targetX}px,${targetY}px) rotate(135deg)`;
+      r.style.transform=`translate(${targetX}px,${targetY}px) rotate(${angle}deg)`;
       r.addEventListener('transitionend',()=>{r.remove(); boom(targetX,targetY);},{once:true});
     }
     function boom(x,y){
