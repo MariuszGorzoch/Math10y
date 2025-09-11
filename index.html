@@ -598,7 +598,7 @@
           score: state.score,
           timeMs: Date.now() - state.startTime
         };
-        fetch('https://mgxscoreapi-dgbzagg8dkdpd3b9.canadacentral-01.azurewebsites.net/score', {
+        fetch('http://mgxscoreapi-dgbzagg8dkdpd3b9.canadacentral-01.azurewebsites.net/scores', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
