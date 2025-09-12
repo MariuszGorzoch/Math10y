@@ -67,7 +67,6 @@
     .footer{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:auto}
     .primary{background:linear-gradient(90deg,#34a3ff,#5fe3ff); color:#05223f}
 
-    .buildInfo{text-align:center; font-size:12px; color:var(--muted); margin-top:8px}
 
     .hidden{display:none}
     .shake{animation:shake .38s cubic-bezier(.36,.07,.19,.97) both}
@@ -156,7 +155,6 @@
         <button class="btn primary" id="againBtn">Zagraj ponownie</button>
       </div>
     </section>
-    <div id="buildInfo" class="buildInfo small"></div>
   </div>
 
   <canvas class="celebrate" id="confetti" width="1920" height="1080"></canvas>
@@ -678,9 +676,6 @@
       const delay=5000+Math.random()*10000;
       setTimeout(()=>{spawnRocket(); rocketLoop();},delay);
     })();
-
-    document.getElementById('buildInfo').textContent =
-      'Wersja z: ' + new Date(document.lastModified).toLocaleString('pl-PL');
 
     // Start gry
     renderQuestion();

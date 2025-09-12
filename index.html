@@ -31,11 +31,12 @@
     .container{width:100%; max-width:980px; margin:0 auto; padding:calc(10px + env(safe-area-inset-top)) 12px calc(10px + env(safe-area-inset-bottom)) 12px; min-height:100dvh; display:flex; flex-direction:column; gap:20px; align-items:center; justify-content:center; text-align:center}
     .panel{background:var(--card); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:14px; box-shadow:0 10px 26px rgba(5,12,28,.45); width:100%; max-width:400px}
     .title{font-size: clamp(24px, 4vw, 40px); font-weight:800}
-    .scoreItem{display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid rgba(255,255,255,.05)}
+    .scoreItem{display:grid; grid-template-columns:1fr auto auto; gap:8px; align-items:center; padding:4px 0; border-bottom:1px solid rgba(255,255,255,.05)}
     .scoreItem:last-child{border-bottom:none}
     .playerBox{display:flex; align-items:center; gap:8px}
     .avatar{width:32px; height:32px; border-radius:50%; object-fit:cover; box-shadow:0 2px 4px rgba(0,0,0,.25)}
     .scoreMeta{display:block; font-size:.5em; color:var(--muted)}
+    .scoreDate{font-size:.8em; color:var(--muted); text-align:center}
     .muted{color:var(--muted)}
 
     .btn{padding:12px 20px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:#0f1d38; color:var(--text); cursor:pointer; font-weight:700; text-align:center; transition: transform .08s ease, border-color .2s, background .2s; user-select:none}
@@ -85,10 +86,11 @@
           row.className = 'scoreItem';
           const avatar = playerIcon || 'stitch.png';
           const timeStr = formatTime(timeMs);
-          const dateStr = registeredAt ? new Date(registeredAt).toLocaleString('pl-PL') : '';
+          const dateStr = registeredAt ? new Date(registeredAt).toLocaleString('pl-PL') : '-';
           row.innerHTML = `
             <span class="playerBox"><img src="${avatar}" class="avatar" alt=""><span>${playerName || 'Anonim'}</span></span>
-            <span>${score}<span class="scoreMeta">${timeStr}${dateStr ? '<br>' + dateStr : ''}</span></span>`;
+            <span class="scoreDate">${dateStr}</span>
+            <span>${score}<span class="scoreMeta">${timeStr}</span></span>`;
           list.appendChild(row);
         });
         scoresBox.innerHTML = '';
