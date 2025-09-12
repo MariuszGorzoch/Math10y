@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="stitch.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Cargo Run">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#0b1220">
+  <title>Cargo Run</title>
+  <style>
+    :root{
+      --bg:#0b1220;--card:#111a2e;--accent:#6cf;--accent2:#9ff;--good:#34d399;--bad:#ef4444;--text:#e6f0ff;--muted:#9bb3d1;--star:#ffe27a;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 70% -10%, #1b2a4b 0%, var(--bg) 60%),
+                  radial-gradient(900px 600px at -10% 110%, #12203a 0%, var(--bg) 60%);
+      color:var(--text);
+      overflow:hidden;
+    }
+    .stars{position:fixed; inset:0; pointer-events:none; z-index:-1}
+    .star{position:absolute; width:2px; height:2px; background:var(--star); opacity:.8; border-radius:50%;
+          animation: twinkle 2.5s infinite ease-in-out}
+    @keyframes twinkle{0%,100%{opacity:.15; transform:scale(.7)}50%{opacity:.9; transform:scale(1)}}
+
+    .container{width:100%; max-width:980px; margin:0 auto; padding:calc(10px + env(safe-area-inset-top)) 12px calc(10px + env(safe-area-inset-bottom)) 12px; min-height:100dvh; display:flex; flex-direction:column; gap:10px}
+    header{display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+    .titleBox{display:flex; align-items:center; gap:10px}
+    .mascot{width:60px; height:60px; border-radius:50%; box-shadow:0 6px 18px rgba(0,0,0,.35); object-fit:cover}
+    .title{font-size: clamp(18px, 2.6vw, 30px); font-weight:800; letter-spacing:.2px}
+    .hud{display:flex; gap:12px; align-items:center}
+    .progress{height:10px; background:#0a1428; border:1px solid rgba(255,255,255,.07); border-radius:999px; overflow:hidden; width:120px}
+    .progress > i{display:block; height:100%; width:100%; background:linear-gradient(90deg,var(--accent),var(--accent2))}
+    .badge{padding:6px 10px; border-radius:999px; background:#0b1630; border:1px solid rgba(255,255,255,.08); font-weight:600}
+
+    .btn{padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:#0f1d38; color:var(--text); cursor:pointer; font-weight:700; text-align:center; transition: transform .08s ease, border-color .2s, background .2s; user-select:none}
+    .btn:hover{transform:translateY(-2px); border-color:var(--accent)}
+    .btn:active{transform:translateY(0)}
+
+    .heroGrid{display:flex; gap:12px; justify-content:center; margin-top:10px}
+    .heroGrid img{width:80px; height:80px; border-radius:50%; cursor:pointer; border:2px solid transparent; object-fit:cover; transition:transform .15s, border-color .15s}
+    .heroGrid img:hover{transform:scale(1.1); border-color:var(--accent)}
+
+    #gameArea{position:relative; flex:1; background:#0a1428; border:1px solid rgba(255,255,255,.06); border-radius:12px; overflow:hidden; touch-action:none}
+    .ship{position:absolute; width:40px; height:40px; border-radius:50%}
+    .cargo{position:absolute; width:30px; height:30px; background:#dba43f; border-radius:6px}
+    .zone{position:absolute; width:60px; height:60px; border:2px dashed var(--accent); border-radius:8px}
+
+    #controls{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); display:flex; gap:10px; z-index:5}
+    #controls button{padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,.12); background:#0f1d38; color:var(--text); font-size:18px}
+
+    #shop{position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:10}
+    #shopBox{background:var(--card); padding:20px; border-radius:12px; text-align:center; width:90%; max-width:300px}
+    #shopBox button{margin-top:10px}
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+  <div id="heroSelect" style="position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.6); z-index:20">
+    <div style="background:var(--card); padding:20px; border-radius:12px; text-align:center">
+      <p>Wybierz statek:</p>
+      <div class="heroGrid">
+        <img src="stitch.png" data-hero="stitch.png" alt="Stiś">
+        <img src="robo.png" data-hero="robo.png" alt="Robo">
+        <img src="astro.png" data-hero="astro.png" alt="Astro">
+      </div>
+    </div>
+  </div>
+  <div class="container" id="game">
+    <header>
+      <div class="titleBox">
+        <img id="heroImg" class="mascot" src="stitch.png" alt="">
+        <div class="title">Cargo Run</div>
+      </div>
+      <div class="hud">
+        <div class="progress"><i id="fuelBar"></i></div>
+        <div class="badge">💰 <span id="credits">0</span></div>
+        <button id="shopBtn" class="badge">Sklep</button>
+      </div>
+    </header>
+    <main id="gameArea"></main>
+  </div>
+
+  <div id="controls">
+    <button data-dx="-1" data-dy="0">◀️</button>
+    <div style="display:flex; flex-direction:column; gap:10px">
+      <button data-dx="0" data-dy="-1">🔼</button>
+      <button data-dx="0" data-dy="1">🔽</button>
+    </div>
+    <button data-dx="1" data-dy="0">▶️</button>
+  </div>
+
+  <div id="shop">
+    <div id="shopBox">
+      <p>Kup 20 paliwa za 5 kredytów?</p>
+      <button id="buyFuel" class="btn">Kup</button>
+      <button id="closeShop" class="btn">Zamknij</button>
+    </div>
+  </div>
+
+  <script>
+    (function makeStars(){
+      const box = document.getElementById('stars');
+      const n = 120;
+      for(let i=0;i<n;i++){
+        const s=document.createElement('i'); s.className='star';
+        s.style.left = Math.random()*100+'%';
+        s.style.top = Math.random()*100+'%';
+        s.style.animationDelay = (Math.random()*2.5)+'s';
+        s.style.opacity = (0.2+Math.random()*0.8).toFixed(2);
+        s.style.transform = `scale(${0.5+Math.random()*1.2})`;
+        box.appendChild(s);
+      }
+    })();
+
+    let hero = localStorage.getItem('selectedHero');
+    const heroImg = document.getElementById('heroImg');
+    const heroSelect = document.getElementById('heroSelect');
+
+    const gameArea = document.getElementById('gameArea');
+    const ship = document.createElement('img');
+    ship.className = 'ship';
+    gameArea.appendChild(ship);
+
+    let shipX = 150, shipY = 150;
+    let vx = 0, vy = 0;
+    let fuel = 100;
+    let credits = 0;
+    let carrying = false;
+    let cargo, zone;
+    const speed = 2;
+    const fuelBar = document.getElementById('fuelBar');
+    const creditsBox = document.getElementById('credits');
+
+    function spawnCargo(){
+      cargo && cargo.remove(); zone && zone.remove();
+      cargo = document.createElement('div');
+      cargo.className='cargo';
+      cargo.style.left = Math.random()*(gameArea.clientWidth-30)+'px';
+      cargo.style.top = Math.random()*(gameArea.clientHeight-30)+'px';
+      gameArea.appendChild(cargo);
+      zone = document.createElement('div');
+      zone.className='zone';
+      zone.style.left = Math.random()*(gameArea.clientWidth-60)+'px';
+      zone.style.top = Math.random()*(gameArea.clientHeight-60)+'px';
+      gameArea.appendChild(zone);
+      carrying = false;
+    }
+
+    function updateHud(){
+      fuelBar.style.width = Math.max(fuel,0)+'%';
+      creditsBox.textContent = credits;
+    }
+
+    function rectsOverlap(a,b){
+      const ar=a.getBoundingClientRect(), br=b.getBoundingClientRect();
+      return !(ar.right<br.left||ar.left>br.right||ar.bottom<br.top||ar.top>br.bottom);
+    }
+
+    function loop(){
+      const prevX = shipX, prevY = shipY;
+      shipX = Math.max(0, Math.min(gameArea.clientWidth-40, shipX + vx*speed));
+      shipY = Math.max(0, Math.min(gameArea.clientHeight-40, shipY + vy*speed));
+      ship.style.transform = `translate(${shipX}px,${shipY}px)`;
+      const dist = Math.hypot(shipX-prevX, shipY-prevY);
+      fuel -= dist*0.1;
+      if(!carrying && cargo && rectsOverlap(ship,cargo)){
+        carrying=true; cargo.style.display='none';
+      }
+      if(carrying && zone && rectsOverlap(ship,zone)){
+        credits+=10; updateHud(); spawnCargo();
+      }
+      if(fuel<=0){
+        if(credits>=5){ if(shop.style.display!=='flex') openShop(); }
+        else { endGame(); return; }
+      }
+      updateHud();
+      requestAnimationFrame(loop);
+    }
+
+    document.addEventListener('keydown',e=>{
+      if(e.key==='ArrowLeft'||e.key==='a') vx=-1;
+      if(e.key==='ArrowRight'||e.key==='d') vx=1;
+      if(e.key==='ArrowUp'||e.key==='w') vy=-1;
+      if(e.key==='ArrowDown'||e.key==='s') vy=1;
+    });
+    document.addEventListener('keyup',e=>{
+      if(['ArrowLeft','a','ArrowRight','d'].includes(e.key)) vx=0;
+      if(['ArrowUp','w','ArrowDown','s'].includes(e.key)) vy=0;
+    });
+
+    document.querySelectorAll('#controls button').forEach(btn=>{
+      btn.addEventListener('touchstart',()=>{vx=Number(btn.dataset.dx); vy=Number(btn.dataset.dy);});
+      btn.addEventListener('touchend',()=>{vx=0; vy=0;});
+    });
+
+    const shop = document.getElementById('shop');
+    document.getElementById('shopBtn').addEventListener('click', openShop);
+    document.getElementById('closeShop').addEventListener('click', ()=> shop.style.display='none');
+    document.getElementById('buyFuel').addEventListener('click', ()=>{
+      if(credits>=5){ credits-=5; fuel+=20; updateHud(); shop.style.display='none'; }
+    });
+
+    function openShop(){ shop.style.display='flex'; }
+
+    const startTime = Date.now();
+    function endGame(){
+      const playerName = prompt('Podaj swoje imię:') || 'Anonim';
+      const payload = {
+        game: 'CargoRun',
+        playerName,
+        playerIcon: hero,
+        score: credits,
+        timeMs: Date.now() - startTime
+      };
+      fetch('https://mgxscoreapi-dgbzagg8dkdpd3b9.canadacentral-01.azurewebsites.net/scores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).catch(err => console.error('Błąd zapisu wyniku', err));
+      alert('Koniec gry! Zdobyto '+credits+' kredytów.');
+      location.href='index.html';
+    }
+
+    function startGame(){
+      ship.src = hero;
+      heroImg.src = hero;
+      spawnCargo();
+      updateHud();
+      requestAnimationFrame(loop);
+    }
+
+    if(!hero){
+      heroSelect.style.display='flex';
+    } else {
+      startGame();
+    }
+
+    document.querySelectorAll('#heroSelect img').forEach(img=>{
+      img.addEventListener('click',()=>{
+        hero = img.dataset.hero;
+        localStorage.setItem('selectedHero', hero);
+        heroSelect.style.display='none';
+        startGame();
+      });
+    });
+  </script>
+</body>
+</html>

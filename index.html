@@ -59,6 +59,7 @@
       <p class="muted">Ładowanie wyników...</p>
     </div>
     <button id="startBtn" class="btn primary">Start gry</button>
+    <button id="cargoBtn" class="btn">Cargo Run</button>
     <div id="heroBox" class="panel" style="display:none">
       <p>Wybierz bohatera:</p>
       <div class="heroGrid">
@@ -128,10 +129,15 @@
     document.getElementById('buildInfo').textContent = 'Wersja z: ' + new Date(document.lastModified).toLocaleString('pl-PL');
 
     const startBtn = document.getElementById('startBtn');
+    const cargoBtn = document.getElementById('cargoBtn');
     const heroBox = document.getElementById('heroBox');
     startBtn.addEventListener('click', () => {
       heroBox.style.display = 'block';
       startBtn.style.display = 'none';
+      cargoBtn.style.display = 'none';
+    });
+    cargoBtn.addEventListener('click', () => {
+      location.href = 'CargoRun.html';
     });
     document.querySelectorAll('#heroBox img').forEach(img => {
       img.addEventListener('click', () => {
