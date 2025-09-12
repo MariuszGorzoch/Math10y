@@ -31,8 +31,11 @@
     .container{width:100%; max-width:980px; margin:0 auto; padding:calc(10px + env(safe-area-inset-top)) 12px calc(10px + env(safe-area-inset-bottom)) 12px; min-height:100dvh; display:flex; flex-direction:column; gap:20px; align-items:center; justify-content:center; text-align:center}
     .panel{background:var(--card); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:14px; box-shadow:0 10px 26px rgba(5,12,28,.45); width:100%; max-width:400px}
     .title{font-size: clamp(24px, 4vw, 40px); font-weight:800}
-    .scoreItem{display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid rgba(255,255,255,.05)}
+    .scoreItem{display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid rgba(255,255,255,.05)}
     .scoreItem:last-child{border-bottom:none}
+    .playerBox{display:flex; align-items:center; gap:8px}
+    .avatar{width:32px; height:32px; border-radius:50%; object-fit:cover; box-shadow:0 2px 4px rgba(0,0,0,.25)}
+    .scoreMeta{display:block; font-size:.5em; color:var(--muted)}
     .muted{color:var(--muted)}
 
     .btn{padding:12px 20px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:#0f1d38; color:var(--text); cursor:pointer; font-weight:700; text-align:center; transition: transform .08s ease, border-color .2s, background .2s; user-select:none}
@@ -70,26 +73,43 @@
 
     const scoresBox = document.getElementById('scoresBox');
     fetch('https://mgxscoreapi-dgbzagg8dkdpd3b9.canadacentral-01.azurewebsites.net/scores/top/Math10y')
-      .then(r=>r.json())
-      .then(data=>{
-        if(!Array.isArray(data) || data.length===0){
+      .then(r => r.json())
+      .then(data => {
+        if (!Array.isArray(data) || data.length === 0) {
           scoresBox.innerHTML = '<p>Brak wyników.</p>';
           return;
         }
         const list = document.createElement('div');
-        data.forEach(item=>{
-          const row=document.createElement('div');
-          row.className='scoreItem';
-          row.innerHTML = `<span>${item.playerName||'Anonim'}</span><span>${item.score}</span>`;
+        data.forEach(({ playerName, playerIcon, score, timeMs, registeredAt }) => {
+          const row = document.createElement('div');
+          row.className = 'scoreItem';
+          const avatar = playerIcon || 'stitch.png';
+          const timeStr = formatTime(timeMs);
+          const dateStr = registeredAt ? new Date(registeredAt).toLocaleString('pl-PL') : '';
+          row.innerHTML = `
+            <span class="playerBox"><img src="${avatar}" class="avatar" alt=""><span>${playerName || 'Anonim'}</span></span>
+            <span>${score}<span class="scoreMeta">${timeStr}${dateStr ? '<br>' + dateStr : ''}</span></span>`;
           list.appendChild(row);
         });
-        scoresBox.innerHTML='';
+        scoresBox.innerHTML = '';
         scoresBox.appendChild(list);
       })
-      .catch(err=>{
+      .catch(err => {
         console.error('Błąd pobierania wyników', err);
         scoresBox.innerHTML = '<p>Nie udało się pobrać wyników.</p>';
       });
+
+    function formatTime(ms){
+      if(!ms) return '-';
+      const totalSeconds = Math.floor(ms/1000);
+      const minutes = Math.floor(totalSeconds/60);
+      const seconds = totalSeconds % 60;
+      const hours = Math.floor(minutes/60);
+      if(hours>0){
+        return `${hours}:${String(minutes%60).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+      }
+      return `${minutes}:${String(seconds).padStart(2,'0')}`;
+    }
 
     document.getElementById('buildInfo').textContent = 'Wersja z: ' + new Date(document.lastModified).toLocaleString('pl-PL');
   </script>
