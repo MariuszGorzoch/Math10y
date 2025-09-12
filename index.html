@@ -44,6 +44,10 @@
     .btn:active{transform:translateY(0)}
     .primary{background:linear-gradient(90deg,#34a3ff,#5fe3ff); color:#05223f}
 
+    .heroGrid{display:flex; gap:12px; justify-content:center; margin-top:10px}
+    .heroGrid img{width:80px; height:80px; border-radius:50%; cursor:pointer; border:2px solid transparent; object-fit:cover; transition:transform .15s, border-color .15s}
+    .heroGrid img:hover{transform:scale(1.1); border-color:var(--accent)}
+
     .buildInfo{text-align:center; font-size:12px; color:var(--muted); margin-top:8px}
   </style>
 </head>
@@ -54,7 +58,15 @@
     <div id="scoresBox" class="panel">
       <p class="muted">Ładowanie wyników...</p>
     </div>
-    <button id="startBtn" class="btn primary" onclick="location.href='Level01.html'">Start gry</button>
+    <button id="startBtn" class="btn primary">Start gry</button>
+    <div id="heroBox" class="panel" style="display:none">
+      <p>Wybierz bohatera:</p>
+      <div class="heroGrid">
+        <img src="stitch.png" data-hero="stitch.png" alt="Stiś">
+        <img src="robo.png" data-hero="robo.png" alt="Robo">
+        <img src="astro.png" data-hero="astro.png" alt="Astro">
+      </div>
+    </div>
     <div class="buildInfo" id="buildInfo"></div>
   </div>
   <script>
@@ -114,6 +126,19 @@
     }
 
     document.getElementById('buildInfo').textContent = 'Wersja z: ' + new Date(document.lastModified).toLocaleString('pl-PL');
+
+    const startBtn = document.getElementById('startBtn');
+    const heroBox = document.getElementById('heroBox');
+    startBtn.addEventListener('click', () => {
+      heroBox.style.display = 'block';
+      startBtn.style.display = 'none';
+    });
+    document.querySelectorAll('#heroBox img').forEach(img => {
+      img.addEventListener('click', () => {
+        localStorage.setItem('selectedHero', img.dataset.hero);
+        location.href = 'Level01.html';
+      });
+    });
   </script>
 </body>
 </html>

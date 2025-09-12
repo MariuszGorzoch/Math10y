@@ -110,10 +110,10 @@
   <div class="container">
     <header>
       <div class="titleBox">
-        <img src="stitch.png" class="mascot" alt="Stiś">
+        <img src="stitch.png" class="mascot" alt="Bohater">
         <div>
           <div class="title">Kosmiczna Misja Stisia</div>
-          <div class="small">Pomóż niebieskiemu kosmicie Stisiowi zbierać ananasy, rozwiązując zadania z matematyki! 🍍</div>
+          <div class="small">Pomóż wybranemu bohaterowi zbierać ananasy, rozwiązując zadania z matematyki! 🍍</div>
         </div>
       </div>
       <div class="scoreRow">
@@ -134,7 +134,7 @@
       <div class="options" id="options"></div>
 
       <div class="speech">
-        <img src="stitch.png" class="mascot" style="width:48px; height:48px" alt="Stiś">
+        <img src="stitch.png" class="mascot" style="width:48px; height:48px" alt="Bohater">
         <div class="bubble small" id="hint">Kliknij poprawną odpowiedź. Za dobrą odpowiedź: +10 punktów i ananas 🟡. Za błąd tracisz serduszko.</div>
       </div>
 
@@ -160,6 +160,10 @@
   <canvas class="celebrate" id="confetti" width="1920" height="1080"></canvas>
 
   <script>
+    const HERO = localStorage.getItem('selectedHero') || 'stitch.png';
+    const HERO_NAMES = { 'stitch.png':'Stiś', 'robo.png':'Robo', 'astro.png':'Astro' };
+    const HERO_NAME = HERO_NAMES[HERO] || 'Bohater';
+    document.querySelectorAll('.mascot').forEach(img => img.src = HERO);
     // --- Małe gwiazdki w tle ---
     (function makeStars(){
       const box = document.getElementById('stars');
@@ -474,7 +478,7 @@
       if(opt.correct){
         btn.classList.add('correct');
         state.score += 10;
-        elHint.textContent = 'Brawo! Stiś znalazł ananasa! 🍍 +10 punktów';
+        elHint.textContent = `Brawo! ${HERO_NAME} znalazł ananasa! 🍍 +10 punktów`;
         confetti();
         isCorrect=true;
       } else {
@@ -584,7 +588,7 @@
 
       // Tekst nad listą
       elSummaryText && (elSummaryText.textContent = completed
-        ? `Misja zakończona! Stiś jest dumny! 🚀`
+        ? `Misja zakończona! ${HERO_NAME} jest dumny! 🚀`
         : `Koniec żyć. Spróbuj ponownie — wierzymy w Ciebie! 💪`);
 
       if (completed) {
@@ -592,7 +596,7 @@
         const payload = {
           game: 'Math10y',
           playerName,
-          playerIcon: 'stitch.png',
+          playerIcon: HERO,
           score: state.score,
           timeMs: Date.now() - state.startTime
         };
