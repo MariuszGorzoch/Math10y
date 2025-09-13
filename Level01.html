@@ -18,11 +18,12 @@
     html,body{height:100%}
     body{
       margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      background: url('LemonBackgrund.png') center/cover no-repeat;
+      background: radial-gradient(1200px 800px at 70% -10%, #1b2a4b 0%, var(--bg) 60%),
+                  radial-gradient(900px 600px at -10% 110%, #12203a 0%, var(--bg) 60%);
       color:var(--text);
       overflow:hidden;
     }
-    .stars{position:fixed; inset:0; pointer-events:none; z-index:-1; display:none}
+    .stars{position:fixed; inset:0; pointer-events:none; z-index:-1}
     .star{position:absolute; width:2px; height:2px; background:var(--star); opacity:.8; border-radius:50%;
           animation: twinkle 2.5s infinite ease-in-out}
     @keyframes twinkle{ 0%,100%{opacity:.15; transform:scale(.7)} 50%{opacity:.9; transform:scale(1)} }
@@ -77,12 +78,6 @@
 
     .celebrate{position:fixed; inset:0; pointer-events:none; z-index:10}
 
-    #scene{position:fixed; inset:0; overflow:hidden; z-index:-1}
-    #scene img{position:absolute}
-    #shop{top:80px; left:50%; transform:translateX(-50%); z-index:2}
-    #treeLine{position:absolute; top:20px; left:50%; transform:translateX(-50%); display:flex; gap:10px; z-index:1}
-    .tree{position:absolute; z-index:1}
-
     /* Silly rocket & boom */
     .rocket{position:fixed; top:0; left:0; font-size:32px; z-index:999; pointer-events:none; transition:transform 3s linear}
     .boom{position:fixed; font-size:48px; pointer-events:none; transform:translate(-50%,-50%) scale(.2); animation:boom .7s ease-out forwards; z-index:999}
@@ -112,22 +107,6 @@
 </head>
 <body>
   <div class="stars" id="stars"></div>
-  <div id="scene">
-    <div id="treeLine">
-      <img src="Tree-1.png" alt="">
-      <img src="Tree-2.png" alt="">
-      <img src="Tree-3.png" alt="">
-      <img src="Tree-1.png" alt="">
-      <img src="Tree-2.png" alt="">
-    </div>
-    <img id="shop" src="LemonShop.png" alt="Lemon Shop">
-    <img class="tree" src="Tree-2.png" style="left:10px; top:40px" alt="">
-    <img class="tree" src="Tree-3.png" style="right:10px; top:40px" alt="">
-    <img class="tree" src="Tree-1.png" style="left:20px; top:200px" alt="">
-    <img class="tree" src="Tree-2.png" style="right:20px; top:220px" alt="">
-    <img class="tree" src="Tree-3.png" style="left:60px; bottom:40px" alt="">
-    <img class="tree" src="Tree-1.png" style="right:60px; bottom:40px" alt="">
-  </div>
   <div class="container">
     <header>
       <div class="titleBox">
@@ -185,7 +164,6 @@
     const HERO_NAMES = { 'stitch.png':'Stiś', 'robo.png':'Robo', 'astro.png':'Astro' };
     const HERO_NAME = HERO_NAMES[HERO] || 'Bohater';
     document.querySelectorAll('.mascot').forEach(img => img.src = HERO);
-    document.documentElement.requestFullscreen?.().catch(() => {});
     // --- Małe gwiazdki w tle ---
     (function makeStars(){
       const box = document.getElementById('stars');
