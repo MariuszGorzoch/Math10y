@@ -47,7 +47,9 @@
     .heroGrid{display:flex; gap:12px; justify-content:center; margin-top:10px}
     .heroGrid img{width:80px; height:80px; border-radius:50%; cursor:pointer; border:2px solid transparent; object-fit:cover; transition:transform .15s, border-color .15s}
     .heroGrid img:hover{transform:scale(1.1); border-color:var(--accent)}
-
+    .productList{display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:20px}
+    .product{position:relative; display:inline-block}
+    .productLabel{position:absolute; top:8px; left:8px; background:rgba(0,0,0,.6); color:#fff; padding:4px 6px; border-radius:4px; font-weight:700; font-family:'Arial Black',sans-serif; font-size:12px; line-height:1.2}
     .buildInfo{text-align:center; font-size:12px; color:var(--muted); margin-top:8px}
   </style>
 </head>
@@ -65,6 +67,20 @@
         <img src="stitch.png" data-hero="stitch.png" alt="Stiś">
         <img src="robo.png" data-hero="robo.png" alt="Robo">
         <img src="astro.png" data-hero="astro.png" alt="Astro">
+      </div>
+    </div>
+    <div class="productList">
+      <div class="product">
+        <img src="stitch.png" alt="Stitch Plush">
+        <div class="productLabel">Brand A<br>Stitch Plush<br>Size: 10cm</div>
+      </div>
+      <div class="product">
+        <img src="robo.png" alt="Robo Toy">
+        <div class="productLabel">Brand B<br>Robo Toy<br>Size: 20cm</div>
+      </div>
+      <div class="product">
+        <img src="astro.png" alt="Astro Figure">
+        <div class="productLabel">Brand C<br>Astro Figure<br>Size: 15cm</div>
       </div>
     </div>
     <div class="buildInfo" id="buildInfo"></div>
