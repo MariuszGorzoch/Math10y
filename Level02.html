@@ -8,7 +8,16 @@
     html,body{height:100%;margin:0}
     body{background:url('LemonBackgrund.png') repeat;background-size:50%;overflow:hidden}
     #map{position:relative;width:100%;height:100%}
-    #shop{position:absolute;top:20px;left:50%;transform:translateX(-50%);width:400px;height:auto;z-index:2}
+    #shopWrapper{position:absolute;top:20px;left:50%;transform:translateX(-50%);width:400px;z-index:2}
+    #shopWrapper{position:relative}
+    #shop{width:100%;height:auto;display:block}
+    .producer{position:absolute;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center}
+    .producer.left{left:-70px}
+    .producer.right{right:-70px}
+    .producer button{width:60px;height:60px;font-size:32px;border:none;border-radius:50%;cursor:pointer;background:#fff}
+    .producer .count{font-family:sans-serif;font-weight:700;margin-bottom:8px;font-size:20px}
+    .producer .count.yellow{color:#facc15}
+    .producer .count.red{color:#ef4444}
     .tree{position:absolute;height:auto;pointer-events:none;z-index:1;transform-origin:center bottom}
     .tree.shake{animation:shake 2s ease-in-out infinite}
     @keyframes shake{
@@ -19,22 +28,21 @@
       100%{transform:var(--base)}
     }
 
-    #hud{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.8);padding:10px 16px;border-radius:12px;font-family:sans-serif;z-index:5}
-    #hud .stock{font-weight:700}
-    #hud button{padding:8px 12px;font-size:16px;cursor:pointer;border-radius:8px;border:1px solid #ccc;background:#fff}
-    #hud .yellow{color:#facc15}
-    #hud .red{color:#ef4444}
   </style>
 </head>
 <body>
   <div id="map">
-    <img id="shop" src="LemonShop.png" alt="Lemon Shop">
-  </div>
-  <div id="hud">
-    <div class="stock yellow">Yellow: <span id="yellowStock">0</span></div>
-    <div class="stock red">Red: <span id="redStock">0</span></div>
-    <button id="makeYellow">Make Yellow</button>
-    <button id="makeRed">Make Red</button>
+    <div id="shopWrapper">
+      <img id="shop" src="LemonShop.png" alt="Lemon Shop">
+      <div class="producer left">
+        <div id="redStock" class="count red">0</div>
+        <button id="makeRed" class="red">🍓</button>
+      </div>
+      <div class="producer right">
+        <div id="yellowStock" class="count yellow">0</div>
+        <button id="makeYellow" class="yellow">🍋</button>
+      </div>
+    </div>
   </div>
   <script>
     const treeImages=['Tree-1.png','Tree-2.png','Tree-3.png'];
