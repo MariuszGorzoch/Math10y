@@ -35,7 +35,7 @@
     }
 
     /* --- Customers --- */
-    .customer{position:absolute;font-size:96px;line-height:1;transition:top 3s linear,left 3s linear}
+    .customer{position:absolute;font-size:96px;line-height:1;transition:top 3s linear,left 3s linear;z-index:5}
     .customer .want{position:absolute;top:-40px;left:50%;transform:translateX(-50%);font-size:32px}
     .customer.waiting{animation:waiting .8s steps(2) infinite}
     @keyframes waiting{from{transform:translateY(0)}to{transform:translateY(-4px)}}
@@ -65,6 +65,30 @@
     const map=document.getElementById('map');
     const shop=document.getElementById('shop');
     const cart=document.getElementById('cart');
+    const CUSTOMER_SIZE=96;
+    const QUEUE_SPACING=Math.round(CUSTOMER_SIZE*0.9);
+    const lane=[];
+
+    function getQueueBaseY(){
+      const cartRect=cart.getBoundingClientRect();
+      const mapRect=map.getBoundingClientRect();
+      return cartRect.top+cartRect.height-mapRect.top+12;
+    }
+
+    function updateLanePositions(){
+      const baseY=getQueueBaseY();
+      lane.forEach((custObj,index)=>{
+        const targetY=baseY+index*QUEUE_SPACING;
+        custObj.el.style.top=targetY+'px';
+      });
+    }
+
+    function removeFromLane(custObj){
+      const idx=lane.indexOf(custObj);
+      if(idx!==-1){
+        lane.splice(idx,1);
+      }
+    }
 
     function overlaps(a,b){
       return a.x<b.x+b.w && a.x+a.w>b.x && a.y<b.y+b.h && a.y+a.h>b.y;
@@ -112,6 +136,7 @@
     }
 
     window.addEventListener('load', placeTrees);
+    window.addEventListener('resize', updateLanePositions);
 
     const yellowStockEl=document.getElementById('yellowStock');
     const redStockEl=document.getElementById('redStock');
@@ -147,6 +172,8 @@
         cust.el.textContent='🥤🙂'; // show customer taking the drink
         removeCup(type);
         stock--;
+        removeFromLane(cust);
+        updateLanePositions();
         const exitLeft=Math.random()<0.5;
         const exitX=exitLeft?-100:map.clientWidth+100;
         cust.el.style.left=exitX+'px';
@@ -168,22 +195,18 @@
       cust.className='customer '+type;
       const want=type==='yellow'? '🍋' : '🍓';
       cust.innerHTML=`<span class="want">${want}</span>🙂`;
-      const size=96;
-      const startX=map.clientWidth/2-size/2;
-      const startY=map.clientHeight-size; // visible at the bottom alley
-      const cartRect=cart.getBoundingClientRect();
-      const mapRect=map.getBoundingClientRect();
+      const startX=map.clientWidth/2-CUSTOMER_SIZE/2;
+      const startY=map.clientHeight-CUSTOMER_SIZE; // visible at the bottom alley
       const targetX=startX; // move straight up so customers stay in line
-      const bottomOfCart=cartRect.top+cartRect.height-mapRect.top;
-      const targetY=bottomOfCart+size; // stop one customer height before the cart
       cust.style.left=startX+'px';
       cust.style.top=startY+'px';
       map.appendChild(cust);
       const obj={el:cust,arrived:false};
+      lane.push(obj);
       if(type==='yellow') yellowQueue.push(obj); else redQueue.push(obj);
       requestAnimationFrame(()=>{
         cust.style.left=targetX+'px';
-        cust.style.top=targetY+'px';
+        updateLanePositions();
       });
       cust.addEventListener('transitionend',e=>{
         if(e.propertyName!=='top') return; // ensure vertical move finished
