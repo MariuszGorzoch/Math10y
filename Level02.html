@@ -79,15 +79,16 @@
       const baseY=getQueueBaseY();
       lane.forEach((custObj,index)=>{
         const targetY=baseY+index*QUEUE_SPACING;
+        if(custObj.targetTop!==targetY){
+          const currentTop=parseFloat(custObj.el.style.top);
+          custObj.targetTop=targetY;
+          if(isNaN(currentTop) || Math.abs(currentTop-targetY)>0.5){
+            custObj.arrived=false;
+            custObj.el.classList.remove('waiting');
+          }
+        }
         custObj.el.style.top=targetY+'px';
       });
-    }
-
-    function removeFromLane(custObj){
-      const idx=lane.indexOf(custObj);
-      if(idx!==-1){
-        lane.splice(idx,1);
-      }
     }
 
     function overlaps(a,b){
@@ -144,9 +145,6 @@
     const cartRed=document.getElementById('cartRed');
     let yellowStock=0;
     let redStock=0;
-    const yellowQueue=[];
-    const redQueue=[];
-
     function addCup(type){
       const cup=document.createElement('span');
       cup.className='cup';
@@ -161,31 +159,46 @@
       if(first) cart.removeChild(first);
     }
 
-    function serveCustomers(type){
-      const queue=type==='yellow'?yellowQueue:redQueue;
-      let stock=type==='yellow'?yellowStock:redStock;
-      while(queue.length>0 && stock>0 && queue[0].arrived){
-        const cust=queue.shift();
-        cust.el.classList.remove('waiting');
-        const wantSpan=cust.el.querySelector('.want');
+    function serveCustomers(){
+      let servedAny=false;
+      while(true){
+        const front=lane[0];
+        if(!front || !front.arrived) break;
+        const type=front.type;
+        let stock=type==='yellow'?yellowStock:redStock;
+        if(stock<=0){
+          front.el.classList.add('waiting');
+          break;
+        }
+        front.el.classList.remove('waiting');
+        const wantSpan=front.el.querySelector('.want');
         wantSpan && wantSpan.remove();
-        cust.el.textContent='🥤🙂'; // show customer taking the drink
+        front.el.textContent='🥤🙂';
         removeCup(type);
         stock--;
-        removeFromLane(cust);
+        if(type==='yellow'){
+          yellowStock=stock;
+          yellowStockEl.textContent=yellowStock;
+        }else{
+          redStock=stock;
+          redStockEl.textContent=redStock;
+        }
+        const served=lane.shift();
         updateLanePositions();
         const exitLeft=Math.random()<0.5;
         const exitX=exitLeft?-100:map.clientWidth+100;
-        cust.el.style.left=exitX+'px';
-        cust.el.addEventListener('transitionend',()=>cust.el.remove(),{once:true});
+        served.el.style.left=exitX+'px';
+        served.el.addEventListener('transitionend',()=>served.el.remove(),{once:true});
+        servedAny=true;
       }
-      if(type==='yellow'){
-        yellowStock=stock; yellowStockEl.textContent=yellowStock;
-      }else{
-        redStock=stock; redStockEl.textContent=redStock;
-      }
-      if(queue.length>0 && queue[0].arrived && stock===0){
-        queue[0].el.classList.add('waiting');
+      if(!servedAny){
+        const front=lane[0];
+        if(front && front.arrived){
+          const stock=front.type==='yellow'?yellowStock:redStock;
+          if(stock===0){
+            front.el.classList.add('waiting');
+          }
+        }
       }
     }
 
@@ -201,9 +214,8 @@
       cust.style.left=startX+'px';
       cust.style.top=startY+'px';
       map.appendChild(cust);
-      const obj={el:cust,arrived:false};
+      const obj={el:cust,arrived:false,targetTop:startY,type};
       lane.push(obj);
-      if(type==='yellow') yellowQueue.push(obj); else redQueue.push(obj);
       requestAnimationFrame(()=>{
         cust.style.left=targetX+'px';
         updateLanePositions();
@@ -211,9 +223,8 @@
       cust.addEventListener('transitionend',e=>{
         if(e.propertyName!=='top') return; // ensure vertical move finished
         obj.arrived=true;
-        cust.classList.add('waiting');
-        serveCustomers(type); // pick up drink if already prepared
-      },{once:true});
+        serveCustomers(); // pick up drink if already prepared
+      });
     }
 
     setInterval(spawnCustomer,3000);
@@ -223,7 +234,7 @@
       yellowStock++;
       yellowStockEl.textContent=yellowStock;
       addCup('yellow');
-      serveCustomers('yellow');
+      serveCustomers();
     });
 
     document.getElementById('makeRed').addEventListener('click',()=>{
@@ -231,7 +242,7 @@
       redStock++;
       redStockEl.textContent=redStock;
       addCup('red');
-      serveCustomers('red');
+      serveCustomers();
     });
   </script>
 </body>
