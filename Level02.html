@@ -170,11 +170,12 @@
       cust.innerHTML=`<span class="want">${want}</span>🙂`;
       const size=96;
       const startX=map.clientWidth/2-size/2;
-      const startY=map.clientHeight;
+      const startY=map.clientHeight-size; // visible at the bottom alley
       const cartRect=cart.getBoundingClientRect();
       const mapRect=map.getBoundingClientRect();
       const targetX=startX; // move straight up so customers stay in line
-      const targetY=cartRect.top+cartRect.height-mapRect.top+10; // stand just below cart
+      const bottomOfCart=cartRect.top+cartRect.height-mapRect.top;
+      const targetY=bottomOfCart+size; // stop one customer height before the cart
       cust.style.left=startX+'px';
       cust.style.top=startY+'px';
       map.appendChild(cust);
