@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lemon Shop - Level 02</title>
+  <style>
+    html,body{height:100%;margin:0}
+    body{background:url('LemonBackgrund.png') no-repeat center/cover;overflow:hidden}
+    #map{position:relative;width:100%;height:100%}
+    #shop{position:absolute;top:20px;left:50%;transform:translateX(-50%);width:200px;height:auto}
+    .tree{position:absolute;height:auto;pointer-events:none}
+  </style>
+</head>
+<body>
+  <div id="map">
+    <img id="shop" src="LemonShop.png" alt="Lemon Shop">
+  </div>
+  <script>
+    const treeImages=['Tree-1.png','Tree-2.png','Tree-3.png'];
+    const map=document.getElementById('map');
+    const shop=document.getElementById('shop');
+
+    function overlaps(a,b){
+      return a.x<b.x+b.w && a.x+a.w>b.x && a.y<b.y+b.h && a.y+a.h>b.y;
+    }
+
+    function placeTrees(){
+      const w=map.clientWidth; const h=map.clientHeight;
+      const shopRect=shop.getBoundingClientRect();
+      const mapRect=map.getBoundingClientRect();
+      const shopBox={x:shopRect.left-mapRect.left,y:shopRect.top-mapRect.top,w:shopRect.width,h:shopRect.height};
+      const pathWidth=120;
+      const yCenter=shopBox.y+shopBox.h/2;
+      const verticalPath={x:w/2-pathWidth/2,y:yCenter-pathWidth/2,w:pathWidth,h:h-(yCenter-pathWidth/2)};
+      const horizontalPath={x:0,y:yCenter-pathWidth/2,w:w,h:pathWidth};
+      for(let i=0;i<20;i++){
+        let tries=0; let placed=false;
+        while(!placed && tries<50){
+          const size=60+Math.random()*40;
+          const x=Math.random()*(w-size);
+          const y=Math.random()*(h-size);
+          const rect={x,y,w:size,h:size};
+          if(overlaps(rect,shopBox) || overlaps(rect,verticalPath) || overlaps(rect,horizontalPath)){
+            tries++;
+            continue;
+          }
+          const img=document.createElement('img');
+          img.src=treeImages[Math.floor(Math.random()*treeImages.length)];
+          img.className='tree';
+          img.style.width=size+'px';
+          img.style.left=x+'px';
+          img.style.top=y+'px';
+          map.appendChild(img);
+          placed=true;
+        }
+      }
+    }
+
+    window.addEventListener('load', placeTrees);
+  </script>
+</body>
+</html>
