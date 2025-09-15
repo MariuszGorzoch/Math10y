@@ -34,6 +34,17 @@
       100%{transform:var(--base)}
     }
 
+    /* --- Customers and queues --- */
+    .queue{position:absolute;top:100%;margin-top:10px;width:60px;display:flex;flex-direction:column;align-items:center}
+    #queueYellow{left:0}
+    #queueRed{right:0;left:auto}
+    .customer{font-size:32px;line-height:1;margin-top:4px;transition:transform .2s}
+    .customer.waiting{animation:waiting .8s steps(2) infinite}
+    @keyframes waiting{from{transform:translateY(0)}to{transform:translateY(-4px)}}
+    .queueCount{position:absolute;top:-30px;font-family:sans-serif;font-weight:700;font-size:20px}
+    #yellowQueueCount{left:0;color:#facc15}
+    #redQueueCount{right:0;color:#ef4444}
+
   </style>
 </head>
 <body>
@@ -44,6 +55,10 @@
         <div id="cartYellow" class="cartSide"></div>
         <div id="cartRed" class="cartSide"></div>
       </div>
+      <div id="yellowQueueCount" class="queueCount">0</div>
+      <div id="redQueueCount" class="queueCount">0</div>
+      <div id="queueYellow" class="queue"></div>
+      <div id="queueRed" class="queue"></div>
       <div class="producer left">
         <div id="yellowStock" class="count yellow">0</div>
         <button id="makeYellow" class="yellow">🍋</button>
@@ -110,8 +125,14 @@
     const redStockEl=document.getElementById('redStock');
     const cartYellow=document.getElementById('cartYellow');
     const cartRed=document.getElementById('cartRed');
+    const queueYellowEl=document.getElementById('queueYellow');
+    const queueRedEl=document.getElementById('queueRed');
+    const yellowQueueCountEl=document.getElementById('yellowQueueCount');
+    const redQueueCountEl=document.getElementById('redQueueCount');
     let yellowStock=0;
     let redStock=0;
+    const yellowQueue=[];
+    const redQueue=[];
 
     function addCup(type){
       const cup=document.createElement('span');
@@ -121,11 +142,62 @@
       if(type==='yellow') cartYellow.appendChild(cup); else cartRed.appendChild(cup);
     }
 
+    function removeCup(type){
+      const cart=type==='yellow'?cartYellow:cartRed;
+      const first=cart.firstElementChild;
+      if(first) cart.removeChild(first);
+    }
+
+    function updateQueueCounts(){
+      yellowQueueCountEl.textContent=yellowQueue.length;
+      redQueueCountEl.textContent=redQueue.length;
+    }
+
+    function serveCustomers(type){
+      const queue=type==='yellow'?yellowQueue:redQueue;
+      if(queue.length>0) queue[0].classList.remove('waiting');
+      let stock=type==='yellow'?yellowStock:redStock;
+      while(queue.length>0 && stock>0){
+        const cust=queue.shift();
+        cust.remove();
+        removeCup(type);
+        stock--;
+      }
+      if(type==='yellow'){
+        yellowStock=stock; yellowStockEl.textContent=yellowStock;
+      }else{
+        redStock=stock; redStockEl.textContent=redStock;
+      }
+      if(queue.length>0 && stock===0){
+        queue[0].classList.add('waiting');
+      }
+      updateQueueCounts();
+    }
+
+    function spawnCustomer(){
+      const type=Math.random()<0.5?'yellow':'red';
+      const cust=document.createElement('div');
+      cust.className='customer '+type;
+      cust.textContent='🙂';
+      if(type==='yellow'){
+        queueYellow.push(cust);
+        queueYellowEl.appendChild(cust);
+      }else{
+        queueRed.push(cust);
+        queueRedEl.appendChild(cust);
+      }
+      updateQueueCounts();
+      serveCustomers(type);
+    }
+
+    setInterval(spawnCustomer,3000);
+
     document.getElementById('makeYellow').addEventListener('click',()=>{
       if(yellowStock>=12) return;
       yellowStock++;
       yellowStockEl.textContent=yellowStock;
       addCup('yellow');
+      serveCustomers('yellow');
     });
 
     document.getElementById('makeRed').addEventListener('click',()=>{
@@ -133,6 +205,7 @@
       redStock++;
       redStockEl.textContent=redStock;
       addCup('red');
+      serveCustomers('red');
     });
   </script>
 </body>
