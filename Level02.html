@@ -180,10 +180,10 @@
       cust.className='customer '+type;
       cust.textContent='🙂';
       if(type==='yellow'){
-        queueYellow.push(cust);
+        yellowQueue.push(cust);
         queueYellowEl.appendChild(cust);
       }else{
-        queueRed.push(cust);
+        redQueue.push(cust);
         queueRedEl.appendChild(cust);
       }
       updateQueueCounts();
