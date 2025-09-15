@@ -183,10 +183,11 @@
         cust.style.left=targetX+'px';
         cust.style.top=targetY+'px';
       });
-      cust.addEventListener('transitionend',()=>{
+      cust.addEventListener('transitionend',e=>{
+        if(e.propertyName!=='top') return; // ensure vertical move finished
         obj.arrived=true;
         cust.classList.add('waiting');
-        serveCustomers(type);
+        // wait for freshly made lemonade before serving
       },{once:true});
     }
 
