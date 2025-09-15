@@ -35,10 +35,11 @@
     }
 
     /* --- Customers and queues --- */
-    .queue{position:absolute;top:100%;margin-top:10px;width:60px;display:flex;flex-direction:column;align-items:center}
+    .queue{position:absolute;top:100%;margin-top:10px;width:100px;display:flex;flex-direction:column;align-items:center;gap:8px}
     #queueYellow{left:0}
     #queueRed{right:0;left:auto}
-    .customer{font-size:32px;line-height:1;margin-top:4px;transition:transform .2s}
+    .customer{position:relative;font-size:96px;line-height:1;transition:transform .2s}
+    .customer .want{position:absolute;top:-40px;left:50%;transform:translateX(-50%);font-size:32px}
     .customer.waiting{animation:waiting .8s steps(2) infinite}
     @keyframes waiting{from{transform:translateY(0)}to{transform:translateY(-4px)}}
     .queueCount{position:absolute;top:-30px;font-family:sans-serif;font-weight:700;font-size:20px}
@@ -178,7 +179,8 @@
       const type=Math.random()<0.5?'yellow':'red';
       const cust=document.createElement('div');
       cust.className='customer '+type;
-      cust.textContent='🙂';
+      const want=type==='yellow'? '🍋' : '🍓';
+      cust.innerHTML=`<span class="want">${want}</span>🙂`;
       if(type==='yellow'){
         yellowQueue.push(cust);
         queueYellowEl.appendChild(cust);
