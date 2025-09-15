@@ -11,8 +11,10 @@
     #shopWrapper{position:absolute;top:20px;left:50%;transform:translateX(-50%);width:400px;z-index:2}
     #shopWrapper{position:relative}
     #shop{width:100%;height:auto;display:block}
-    #cart{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);width:260px;height:80px;display:flex;justify-content:space-between;pointer-events:none}
-    .cartSide{display:flex;flex-wrap:wrap;width:48%;gap:2px;align-content:flex-start}
+    #cart{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);width:300px;height:80px;display:flex;justify-content:space-between;pointer-events:none}
+    .cartSide{display:flex;flex-wrap:wrap;width:50%;gap:1px;align-content:flex-start}
+    #cartYellow{justify-content:flex-start}
+    #cartRed{justify-content:flex-end}
     .cup{position:relative;font-size:24px;line-height:1}
     .cup .fruit{position:absolute;top:4px;left:4px;font-size:14px}
     .producer{position:absolute;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center}
@@ -120,12 +122,14 @@
     }
 
     document.getElementById('makeYellow').addEventListener('click',()=>{
+      if(yellowStock>=12) return;
       yellowStock++;
       yellowStockEl.textContent=yellowStock;
       addCup('yellow');
     });
 
     document.getElementById('makeRed').addEventListener('click',()=>{
+      if(redStock>=12) return;
       redStock++;
       redStockEl.textContent=redStock;
       addCup('red');
