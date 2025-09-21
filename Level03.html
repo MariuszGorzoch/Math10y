@@ -60,17 +60,22 @@
 
     .operationInfo{background:#0a1428; border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px 12px; line-height:1.4}
 
-    .characters{display:flex; gap:10px; flex-wrap:wrap}
-    .avatar{flex:1 1 220px; min-width:220px; display:flex; gap:10px; align-items:center; border-radius:14px; border:1px solid rgba(255,255,255,.08); background:#0f1d38; padding:10px; color:var(--text); cursor:pointer; transition:transform .12s ease, border-color .2s ease, box-shadow .2s ease}
-    .avatar img{width:54px; height:54px; border-radius:50%; box-shadow:0 6px 16px rgba(0,0,0,.35); object-fit:cover}
-    .avatar .avatarMeta{display:flex; flex-direction:column; gap:2px}
+    .padLayout{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,clamp(220px,45vw,340px)) minmax(0,1fr); gap:16px; align-items:stretch; width:100%}
+    .padColumn{display:flex; flex-direction:column; align-items:stretch; gap:12px; width:100%}
+
+    .avatar{display:flex; flex-direction:column; gap:12px; align-items:center; justify-content:center; border-radius:14px; border:1px solid rgba(255,255,255,.08); background:#0f1d38; padding:14px 12px; color:var(--text); cursor:pointer; transition:transform .12s ease, border-color .2s ease, box-shadow .2s ease; min-width:0; text-align:center}
+    .avatar img{width:60px; height:60px; border-radius:50%; box-shadow:0 6px 16px rgba(0,0,0,.35); object-fit:cover}
+    .avatar .avatarMeta{display:flex; flex-direction:column; gap:4px; align-items:center}
     .avatar .small{font-size:13px; color:var(--muted)}
     .avatar.active{border-color:var(--accent); box-shadow:0 10px 22px rgba(60,140,255,.35)}
     .avatar:focus-visible{outline:2px solid var(--accent); outline-offset:4px}
 
+    .pad{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; width:100%; max-width:100%; margin:0}
+    .padColumn .pad{max-width:360px}
+    .padColumn .hint{width:100%}
+
     .hint{background:#0a1a33; border:1px dashed rgba(255,255,255,.1); padding:10px 12px; border-radius:10px; color:var(--muted)}
 
-    .pad{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; width:100%; max-width:360px; margin:0 auto}
     .key{position:relative; border-radius:18px; border:1px solid rgba(255,255,255,.12); background:#0f1d38; color:var(--text); font-size: clamp(24px, 6vw, 32px); font-weight:700; display:flex; align-items:center; justify-content:center; padding:0; aspect-ratio:1/1; cursor:pointer; transition: transform .08s ease, border-color .2s ease, background .2s ease}
     .key:hover{transform:translateY(-2px); border-color:var(--accent)}
     .key:active{transform:translateY(0)}
@@ -100,12 +105,18 @@
     @keyframes shake{10%, 90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-4px)}40%,60%{transform:translateX(4px)}}
     @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 
-    @media (max-width:620px){
-      .avatar{min-width:0; flex:1 1 100%}
-      .pad{max-width:100%; gap:10px}
+    @media (max-width:720px){
+      .padLayout{gap:12px}
+      .pad{gap:10px}
+    }
+    @media (max-width:560px){
+      .padLayout{grid-template-columns:minmax(0,1fr); grid-auto-flow:row; justify-items:center; gap:12px}
+      .padLayout > .avatar{width:100%; max-width:260px}
+      .padLayout > .padColumn{width:100%; max-width:320px}
     }
     @media (max-width:480px){
       .avatar img{width:48px; height:48px}
+      .avatar{padding:12px 10px}
       .question{font-size:16px}
       .btn{font-size:16px}
       .equation{font-size:22px}
@@ -157,7 +168,7 @@
 
       <div class="operationInfo small" id="operationInfo">Wybierz działanie, aby zobaczyć wskazówkę.</div>
 
-      <div class="characters" role="group" aria-label="Wybierz bohatera do przesuwania">
+      <div class="padLayout" role="group" aria-label="Wybierz bohatera do przesuwania">
         <button type="button" class="avatar active" data-hero="0">
           <img id="heroAImg" src="stitch.png" alt="Pierwszy bohater">
           <div class="avatarMeta">
@@ -165,6 +176,10 @@
             <div class="small">Cyfra: <span id="hero0Choice">?</span></div>
           </div>
         </button>
+        <div class="padColumn">
+          <div class="pad" id="pad" role="grid" aria-label="Panel cyfr"></div>
+          <div class="hint small" id="hint">Kliknij bohatera, aby go aktywować, a następnie wybierz cyfrę z panelu. Gdy oba pola będą ustawione, wciśnij przycisk CHECK.</div>
+        </div>
         <button type="button" class="avatar" data-hero="1">
           <img id="heroBImg" src="robo.png" alt="Drugi bohater">
           <div class="avatarMeta">
@@ -173,10 +188,6 @@
           </div>
         </button>
       </div>
-
-      <div class="hint small" id="hint">Kliknij bohatera, aby go aktywować, a następnie wybierz cyfrę z panelu. Gdy oba pola będą ustawione, wciśnij przycisk CHECK.</div>
-
-      <div class="pad" id="pad" role="grid" aria-label="Panel cyfr"></div>
 
       <button type="button" class="btn primary" id="checkBtn">CHECK</button>
 
