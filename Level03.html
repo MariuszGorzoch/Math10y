@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="stitch.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Kosmiczna Misja Stisia">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#0b1220">
+  <title>Kosmiczna Misja Stisia — Level 03</title>
+  <style>
+    :root{
+      --bg:#0b1220;--card:#111a2e;--accent:#6cf;--accent2:#9ff;--good:#34d399;--bad:#ef4444;--warn:#facc15;--text:#e6f0ff;--muted:#9bb3d1;--star:#ffe27a;
+      --hero0:url('stitch.png');
+      --hero1:url('robo.png');
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 70% -10%, #1b2a4b 0%, var(--bg) 60%),
+                  radial-gradient(900px 600px at -10% 110%, #12203a 0%, var(--bg) 60%);
+      color:var(--text);
+      overflow:hidden;
+    }
+    .stars{position:fixed; inset:0; pointer-events:none; z-index:-1}
+    .star{position:absolute; width:2px; height:2px; background:var(--star); opacity:.8; border-radius:50%; animation:twinkle 2.5s infinite ease-in-out}
+    @keyframes twinkle{0%,100%{opacity:.15; transform:scale(.7)}50%{opacity:.9; transform:scale(1)}}
+
+    .container{width:100%; max-width:980px; margin:0 auto; padding:calc(10px + env(safe-area-inset-top)) 14px calc(16px + env(safe-area-inset-bottom)) 14px; min-height:100dvh; display:flex; flex-direction:column; gap:12px}
+    header{display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+    .titleBox{display:flex; align-items:center; gap:10px}
+    .mascot{width:60px; height:60px; border-radius:50%; box-shadow:0 6px 18px rgba(0,0,0,.35); animation:float 3s ease-in-out infinite; object-fit:cover}
+    .title{font-size: clamp(18px, 2.6vw, 30px); font-weight:800; letter-spacing:.2px}
+
+    .panel{background:var(--card); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:14px; box-shadow:0 10px 26px rgba(5,12,28,.45)}
+
+    .hud{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+    .progressWrap{flex:1 1 220px; min-width:180px}
+    .progress{height:10px; background:#0a1428; border:1px solid rgba(255,255,255,.07); border-radius:999px; overflow:hidden}
+    .progress > i{display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .35s ease}
+    .badge{padding:8px 10px; border-radius:999px; background:#0b1630; border:1px solid rgba(255,255,255,.08); font-weight:600; display:inline-flex; align-items:center; gap:6px}
+    .hud button.badge{cursor:pointer; background:#0f1d38; transition:background .2s ease, transform .12s ease}
+    .hud button.badge:hover{background:#152447; transform:translateY(-1px)}
+
+    main{display:flex; flex-direction:column; gap:14px; flex:1; min-height:0}
+    .qtitle{color:var(--muted); font-size:14px; text-transform:uppercase; letter-spacing:.1em}
+    .question{font-size:18px; font-weight:700; line-height:1.35}
+
+    .operationTag{display:flex; flex-wrap:wrap; gap:14px; align-items:center}
+    .operationTag span{font-size:15px}
+    .operationTag strong{color:var(--accent)}
+
+    .equation{display:flex; gap:10px; align-items:center; font-size: clamp(22px, 5vw, 32px); font-weight:700; justify-content:center; padding:12px; border-radius:12px; background:#0c1834; border:1px solid rgba(255,255,255,.08)}
+    .equation .slot{min-width:44px; text-align:center}
+    .equation .result{color:var(--accent)}
+
+    .operationInfo{background:#0a1428; border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px 12px; line-height:1.4}
+
+    .characters{display:flex; gap:10px; flex-wrap:wrap}
+    .avatar{flex:1 1 220px; min-width:220px; display:flex; gap:10px; align-items:center; border-radius:14px; border:1px solid rgba(255,255,255,.08); background:#0f1d38; padding:10px; color:var(--text); cursor:pointer; transition:transform .12s ease, border-color .2s ease, box-shadow .2s ease}
+    .avatar img{width:54px; height:54px; border-radius:50%; box-shadow:0 6px 16px rgba(0,0,0,.35); object-fit:cover}
+    .avatar .avatarMeta{display:flex; flex-direction:column; gap:2px}
+    .avatar .small{font-size:13px; color:var(--muted)}
+    .avatar.active{border-color:var(--accent); box-shadow:0 10px 22px rgba(60,140,255,.35)}
+    .avatar:focus-visible{outline:2px solid var(--accent); outline-offset:4px}
+
+    .hint{background:#0a1a33; border:1px dashed rgba(255,255,255,.1); padding:10px 12px; border-radius:10px; color:var(--muted)}
+
+    .pad{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; width:100%; max-width:360px; margin:0 auto}
+    .key{position:relative; border-radius:18px; border:1px solid rgba(255,255,255,.12); background:#0f1d38; color:var(--text); font-size: clamp(24px, 6vw, 32px); font-weight:700; display:flex; align-items:center; justify-content:center; padding:0; aspect-ratio:1/1; cursor:pointer; transition: transform .08s ease, border-color .2s ease, background .2s ease}
+    .key:hover{transform:translateY(-2px); border-color:var(--accent)}
+    .key:active{transform:translateY(0)}
+    .spacer{width:100%; aspect-ratio:1/1}
+    .spacer::after{content:''; display:block}
+
+    .key::before,
+    .key::after{content:''; position:absolute; width:44px; height:44px; top:-20px; left:50%; transform:translate(-50%,10px) scale(.6); background-size:cover; background-position:center; background-repeat:no-repeat; border-radius:50%; box-shadow:0 10px 22px rgba(5,12,28,.6); opacity:0; transition:transform .2s ease, opacity .2s ease}
+    .key[data-hero0]::before{opacity:1; background-image:var(--hero0); transform:translate(-60%, -20px) scale(1)}
+    .key[data-hero0]:not([data-hero1])::before{transform:translate(-50%, -20px) scale(1)}
+    .key[data-hero1]::after{opacity:1; background-image:var(--hero1); transform:translate(-40%, -20px) scale(1)}
+    .key[data-hero1]:not([data-hero0])::after{transform:translate(-50%, -20px) scale(1)}
+
+    .btn{padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:#0f1d38; color:var(--text); cursor:pointer; font-weight:700; text-align:center; transition: transform .08s ease, border-color .2s ease, background .2s ease}
+    .btn:hover{transform:translateY(-2px); border-color:var(--accent)}
+    .btn.primary{background:linear-gradient(90deg,#34a3ff,#5fe3ff); color:#05223f; border:none; box-shadow:0 12px 24px rgba(24,122,255,.25)}
+    .btn.primary:hover{transform:translateY(-2px); box-shadow:0 16px 30px rgba(24,122,255,.35)}
+    .btn.primary:active{transform:translateY(0)}
+
+    .feedback{min-height:32px; font-size:15px; line-height:1.4; padding:10px 12px; border-radius:12px; border:1px solid transparent; background:#0a1428; color:var(--text)}
+    .feedback.info{border-color:rgba(255,255,255,.08); color:var(--muted)}
+    .feedback.good{border-color:rgba(52,211,153,.4); color:var(--good)}
+    .feedback.bad{border-color:rgba(239,68,68,.4); color:var(--bad)}
+    .feedback.warn{border-color:rgba(250,204,21,.4); color:var(--warn)}
+
+    .shake{animation:shake .38s cubic-bezier(.36,.07,.19,.97) both}
+    @keyframes shake{10%, 90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-4px)}40%,60%{transform:translateX(4px)}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+    @media (max-width:620px){
+      .avatar{min-width:0; flex:1 1 100%}
+      .pad{max-width:100%; gap:10px}
+    }
+    @media (max-width:480px){
+      .avatar img{width:48px; height:48px}
+      .question{font-size:16px}
+      .btn{font-size:16px}
+      .equation{font-size:22px}
+    }
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+  <div class="container">
+    <header>
+      <div class="titleBox">
+        <img src="stitch.png" class="mascot" id="leadHero" alt="Bohater" />
+        <div>
+          <div class="title">Kosmiczna Misja Stisia — Level 03</div>
+          <div class="small" id="subtitle">Ustaw bohaterów na cyfrach i stwórz poprawne działanie.</div>
+        </div>
+      </div>
+      <div class="scoreRow" style="display:flex; gap:6px; flex-wrap:wrap; align-items:center">
+        <span class="badge">Poziom: 3</span>
+        <span class="badge" id="scoreBadge">Punkty: 0</span>
+        <span class="badge" id="mistakesBadge">Błędy: 0</span>
+      </div>
+    </header>
+
+    <div class="panel hud">
+      <div class="progressWrap">
+        <div class="progress" aria-label="Postęp misji"><i id="progressBar"></i></div>
+      </div>
+      <span class="badge" id="roundBadge">Zadanie 1/10</span>
+      <button class="badge" id="resetBtn" type="button" title="Zacznij od nowa">↻ Restart</button>
+    </div>
+
+    <main class="panel" id="game">
+      <div class="qtitle">Cel misji</div>
+      <div class="question" id="question">Twoim zadaniem jest dobrać cyfry, aby rozwiązanie było poprawne.</div>
+
+      <div class="operationTag small" aria-live="polite">
+        <span>Operacja: <strong id="operationName">Dodawanie (+)</strong></span>
+        <span>Cel: <strong id="targetValue">0</strong></span>
+      </div>
+
+      <div class="equation" aria-live="polite">
+        <span class="slot" id="eqA">?</span>
+        <span class="slot" id="eqOp">+</span>
+        <span class="slot" id="eqB">?</span>
+        <span class="slot">=</span>
+        <span class="slot result" id="eqResult">0</span>
+      </div>
+
+      <div class="operationInfo small" id="operationInfo">Wybierz działanie, aby zobaczyć wskazówkę.</div>
+
+      <div class="characters" role="group" aria-label="Wybierz bohatera do przesuwania">
+        <button type="button" class="avatar active" data-hero="0">
+          <img id="heroAImg" src="stitch.png" alt="Pierwszy bohater">
+          <div class="avatarMeta">
+            <strong id="hero0Name">Stiś</strong>
+            <div class="small">Cyfra: <span id="hero0Choice">?</span></div>
+          </div>
+        </button>
+        <button type="button" class="avatar" data-hero="1">
+          <img id="heroBImg" src="robo.png" alt="Drugi bohater">
+          <div class="avatarMeta">
+            <strong id="hero1Name">Robo</strong>
+            <div class="small">Cyfra: <span id="hero1Choice">?</span></div>
+          </div>
+        </button>
+      </div>
+
+      <div class="hint small" id="hint">Kliknij bohatera, aby go aktywować, a następnie wybierz cyfrę z panelu. Gdy oba pola będą ustawione, wciśnij przycisk CHECK.</div>
+
+      <div class="pad" id="pad" role="grid" aria-label="Panel cyfr"></div>
+
+      <button type="button" class="btn primary" id="checkBtn">CHECK</button>
+
+      <div id="feedback" class="feedback info" role="status" aria-live="polite"></div>
+    </main>
+  </div>
+
+  <script>
+    const HEROES = ['stitch.png','robo.png','astro.png'];
+    const HERO_NAMES = {'stitch.png':'Stiś','robo.png':'Robo','astro.png':'Astro'};
+    const HERO = localStorage.getItem('selectedHero') || 'stitch.png';
+    const sidekicks = HEROES.filter(h => h !== HERO);
+    const SIDEKICK = sidekicks.length ? sidekicks[0] : HEROES[0];
+    const HERO_NAME = HERO_NAMES[HERO] || 'Bohater';
+    const SIDEKICK_NAME = HERO_NAMES[SIDEKICK] || 'Przyjaciel';
+
+    document.documentElement.style.setProperty('--hero0', `url("${HERO}")`);
+    document.documentElement.style.setProperty('--hero1', `url("${SIDEKICK}")`);
+    document.getElementById('leadHero').src = HERO;
+    document.getElementById('heroAImg').src = HERO;
+    document.getElementById('heroBImg').src = SIDEKICK;
+    document.getElementById('hero0Name').textContent = HERO_NAME;
+    document.getElementById('hero1Name').textContent = SIDEKICK_NAME;
+    document.getElementById('subtitle').textContent = `${HERO_NAME} i ${SIDEKICK_NAME} muszą otworzyć portale liczbowe!`;
+
+    (function makeStars(){
+      const box = document.getElementById('stars');
+      const n = 120;
+      for(let i=0;i<n;i++){
+        const s=document.createElement('i');
+        s.className='star';
+        s.style.left = Math.random()*100+'%';
+        s.style.top = Math.random()*100+'%';
+        s.style.animationDelay = (Math.random()*2.5)+'s';
+        s.style.opacity = (0.2+Math.random()*0.8).toFixed(2);
+        s.style.transform = `scale(${0.5+Math.random()*1.2})`;
+        box.appendChild(s);
+      }
+    })();
+
+    const pad = document.getElementById('pad');
+    const layout = [7,8,9,4,5,6,1,2,3,null,0,null];
+    layout.forEach(val => {
+      if(val === null){
+        const spacer=document.createElement('div');
+        spacer.className='spacer';
+        spacer.setAttribute('aria-hidden','true');
+        pad.appendChild(spacer);
+      }else{
+        const btn=document.createElement('button');
+        btn.type='button';
+        btn.className='key';
+        btn.dataset.digit=String(val);
+        btn.setAttribute('role','gridcell');
+        btn.setAttribute('aria-label',`Cyfra ${val}`);
+        btn.textContent=val;
+        pad.appendChild(btn);
+      }
+    });
+
+    const roundBadge = document.getElementById('roundBadge');
+    const scoreBadge = document.getElementById('scoreBadge');
+    const mistakesBadge = document.getElementById('mistakesBadge');
+    const progressBar = document.getElementById('progressBar');
+    const questionEl = document.getElementById('question');
+    const operationNameEl = document.getElementById('operationName');
+    const targetValueEl = document.getElementById('targetValue');
+    const operationInfoEl = document.getElementById('operationInfo');
+    const feedbackEl = document.getElementById('feedback');
+    const checkBtn = document.getElementById('checkBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const heroButtons = Array.from(document.querySelectorAll('.avatar'));
+    const heroChoiceEls = [document.getElementById('hero0Choice'), document.getElementById('hero1Choice')];
+    const eqA = document.getElementById('eqA');
+    const eqB = document.getElementById('eqB');
+    const eqOp = document.getElementById('eqOp');
+    const eqResult = document.getElementById('eqResult');
+
+    let activeHero = 0;
+    let selections = [null, null];
+    let score = 0;
+    let mistakes = 0;
+    let completed = 0;
+    const totalRounds = 10;
+    let challenge = null;
+
+    const operations = [
+      {
+        key: '+',
+        display: '+',
+        name: 'Dodawanie',
+        verb: 'dodać',
+        description: 'Dodaj cyfry, aby powstała odpowiednia suma.',
+        generate(){
+          const a = ri(0,9);
+          const b = ri(0,9);
+          return {target: a + b};
+        },
+        apply:(a,b)=>a+b
+      },
+      {
+        key: '-',
+        display: '-',
+        name: 'Odejmowanie',
+        verb: 'odjąć',
+        description: 'Odejmij drugą cyfrę od pierwszej, aby uzyskać różnicę.',
+        generate(){
+          const a = ri(0,9);
+          const b = ri(0,a);
+          return {target: a - b};
+        },
+        apply:(a,b)=>a-b
+      },
+      {
+        key: '*',
+        display: '×',
+        name: 'Mnożenie',
+        verb: 'pomnożyć',
+        description: 'Pomnóż cyfry, by otrzymać właściwy iloczyn.',
+        generate(){
+          const a = ri(0,9);
+          const b = ri(0,9);
+          return {target: a * b};
+        },
+        apply:(a,b)=>a*b
+      },
+      {
+        key: '/',
+        display: '÷',
+        name: 'Dzielenie',
+        verb: 'podzielić',
+        description: 'Podziel pierwszą cyfrę przez drugą, aby otrzymać iloraz.',
+        generate(){
+          const divisor = ri(1,9);
+          const candidates = [0];
+          for(let i=1;i<=9;i++){
+            if(i % divisor === 0) candidates.push(i);
+          }
+          const dividend = candidates[ri(0,candidates.length-1)];
+          return {target: dividend / divisor};
+        },
+        apply:(a,b)=> b===0 ? Infinity : a/b
+      }
+    ];
+
+    pad.addEventListener('click', event => {
+      const btn = event.target.closest('.key');
+      if(!btn) return;
+      const digit = Number(btn.dataset.digit);
+      moveHeroToDigit(activeHero, digit);
+    });
+
+    heroButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.hero);
+        setActiveHero(idx);
+      });
+    });
+
+    checkBtn.addEventListener('click', () => {
+      if(!challenge) return;
+      if(selections.some(v => v === null)){
+        showFeedback('Najpierw ustaw obie cyfry dla bohaterów.', 'warn');
+        return;
+      }
+      const [aSel, bSel] = selections;
+      if(challenge.key === '/' && bSel === 0){
+        showFeedback('Nie dzielimy przez zero! Przesuń drugiego bohatera na inną cyfrę.', 'warn');
+        shakeSelection();
+        return;
+      }
+      const result = challenge.apply(aSel, bSel);
+      const expected = challenge.target;
+      if(Math.abs(result - expected) < 1e-9){
+        score += 10;
+        completed += 1;
+        scoreBadge.textContent = `Punkty: ${score}`;
+        progressBar.style.width = `${(completed/totalRounds)*100}%`;
+        showFeedback(`Super! ${aSel} ${challenge.display} ${bSel} = ${formatValue(expected)}.`, 'good');
+        checkBtn.disabled = true;
+        setTimeout(() => {
+          checkBtn.disabled = false;
+          newChallenge();
+        }, 900);
+      } else {
+        mistakes += 1;
+        mistakesBadge.textContent = `Błędy: ${mistakes}`;
+        showFeedback(`Spróbuj ponownie! ${aSel} ${challenge.display} ${bSel} = ${formatValue(result)}.`, 'bad');
+        shakeSelection();
+      }
+    });
+
+    resetBtn.addEventListener('click', () => {
+      resetGame();
+    });
+
+    function moveHeroToDigit(heroIndex, digit){
+      if(Number.isNaN(digit)) return;
+      const key = `hero${heroIndex}`;
+      const previous = selections[heroIndex];
+      if(previous !== null){
+        const prevBtn = pad.querySelector(`.key[data-digit="${previous}"]`);
+        if(prevBtn){
+          delete prevBtn.dataset[key];
+        }
+      }
+      const btn = pad.querySelector(`.key[data-digit="${digit}"]`);
+      if(!btn) return;
+      btn.dataset[key] = 'true';
+      selections[heroIndex] = digit;
+      heroChoiceEls[heroIndex].textContent = digit;
+      if(feedbackEl.classList.contains('info')){
+        showFeedback('Świetnie! Gdy będziesz gotów, kliknij CHECK.', 'info');
+      }
+      updateEquation();
+      updateCheckState();
+    }
+
+    function setActiveHero(index){
+      activeHero = index;
+      heroButtons.forEach(btn => btn.classList.toggle('active', Number(btn.dataset.hero) === index));
+    }
+
+    function updateEquation(){
+      eqA.textContent = selections[0] !== null ? selections[0] : '?';
+      eqB.textContent = selections[1] !== null ? selections[1] : '?';
+      eqOp.textContent = challenge ? challenge.display : '?';
+      eqResult.textContent = challenge ? formatValue(challenge.target) : '?';
+    }
+
+    function updateCheckState(){
+      checkBtn.disabled = !challenge || selections.some(v => v === null);
+    }
+
+    function showFeedback(message, type='info'){
+      feedbackEl.textContent = message;
+      feedbackEl.className = `feedback ${type}`;
+    }
+
+    function shakeSelection(){
+      const buttons = selections
+        .map(val => pad.querySelector(`.key[data-digit="${val}"]`))
+        .filter(Boolean);
+      buttons.forEach(btn => {
+        btn.classList.remove('shake');
+        void btn.offsetWidth;
+        btn.classList.add('shake');
+      });
+    }
+
+    function formatValue(val){
+      if(!Number.isFinite(val)) return '∞';
+      return Number.isInteger(val) ? String(val) : val.toFixed(2).replace(/\.00$/, '');
+    }
+
+    function ri(min,max){
+      return Math.floor(Math.random()*(max-min+1))+min;
+    }
+
+    function newChallenge(){
+      if(completed >= totalRounds){
+        roundBadge.textContent = `Zadanie ${totalRounds}/${totalRounds}`;
+        operationNameEl.textContent = 'Misja zakończona';
+        targetValueEl.textContent = '—';
+        operationInfoEl.textContent = `${HERO_NAME} i ${SIDEKICK_NAME} wykonali wszystkie zadania. Kliknij „Restart”, aby zagrać ponownie.`;
+        questionEl.textContent = 'Świetna robota! Wszystkie portale liczbowe zostały otwarte.';
+        eqOp.textContent = '✓';
+        eqResult.textContent = '🎉';
+        showFeedback(`Zdobyte punkty: ${score}. Wybierz „Restart”, aby rozpocząć kolejną serię.`, 'good');
+        challenge = null;
+        updateCheckState();
+        return;
+      }
+      const op = operations[ri(0, operations.length-1)];
+      const data = op.generate();
+      challenge = {
+        key: op.key,
+        display: op.display,
+        name: op.name,
+        verb: op.verb,
+        description: op.description,
+        target: data.target,
+        apply: op.apply
+      };
+      questionEl.textContent = `Które dwie cyfry należy ${op.verb}, aby wynik był równy ${formatValue(challenge.target)}?`;
+      operationNameEl.textContent = `${op.name} (${op.key})`;
+      targetValueEl.textContent = formatValue(challenge.target);
+      operationInfoEl.textContent = op.description;
+      roundBadge.textContent = `Zadanie ${completed + 1}/${totalRounds}`;
+      showFeedback('Przesuń bohaterów i naciśnij CHECK, aby sprawdzić rozwiązanie.', 'info');
+      updateEquation();
+      updateCheckState();
+    }
+
+    function resetGame(){
+      selections = [null, null];
+      challenge = null;
+      pad.querySelectorAll('.key').forEach(btn => {
+        delete btn.dataset.hero0;
+        delete btn.dataset.hero1;
+      });
+      score = 0;
+      mistakes = 0;
+      completed = 0;
+      scoreBadge.textContent = 'Punkty: 0';
+      mistakesBadge.textContent = 'Błędy: 0';
+      progressBar.style.width = '0%';
+      setActiveHero(0);
+      moveHeroToDigit(0, 4);
+      moveHeroToDigit(1, 6);
+      showFeedback('Nowa misja! Dopasuj cyfry i sprawdź wynik.', 'info');
+      newChallenge();
+    }
+
+    // start
+    setActiveHero(0);
+    moveHeroToDigit(0, 4);
+    moveHeroToDigit(1, 6);
+    newChallenge();
+
+  </script>
+</body>
+</html>
