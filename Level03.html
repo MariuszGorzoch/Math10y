@@ -83,11 +83,11 @@
     .spacer::after{content:''; display:block}
 
     .key::before,
-    .key::after{content:''; position:absolute; width:44px; height:44px; top:-20px; left:50%; transform:translate(-50%,10px) scale(.6); background-size:cover; background-position:center; background-repeat:no-repeat; border-radius:50%; box-shadow:0 10px 22px rgba(5,12,28,.6); opacity:0; transition:transform .2s ease, opacity .2s ease}
-    .key[data-hero0]::before{opacity:1; background-image:var(--hero0); transform:translate(-60%, -20px) scale(1)}
-    .key[data-hero0]:not([data-hero1])::before{transform:translate(-50%, -20px) scale(1)}
-    .key[data-hero1]::after{opacity:1; background-image:var(--hero1); transform:translate(-40%, -20px) scale(1)}
-    .key[data-hero1]:not([data-hero0])::after{transform:translate(-50%, -20px) scale(1)}
+    .key::after{content:''; position:absolute; width:44px; height:44px; top:-6px; left:50%; transform:translate(-50%, -2px) scale(.68); background-size:cover; background-position:center; background-repeat:no-repeat; border-radius:50%; box-shadow:0 10px 22px rgba(5,12,28,.6); opacity:0; transition:transform .2s ease, opacity .2s ease}
+    .key[data-hero0]::before{opacity:1; background-image:var(--hero0); transform:translate(-62%, -8px) scale(.98)}
+    .key[data-hero0]:not([data-hero1])::before{transform:translate(-50%, -8px) scale(.98)}
+    .key[data-hero1]::after{opacity:1; background-image:var(--hero1); transform:translate(-38%, -8px) scale(.98)}
+    .key[data-hero1]:not([data-hero0])::after{transform:translate(-50%, -8px) scale(.98)}
 
     .btn{padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:#0f1d38; color:var(--text); cursor:pointer; font-weight:700; text-align:center; transition: transform .08s ease, border-color .2s ease, background .2s ease}
     .btn:hover{transform:translateY(-2px); border-color:var(--accent)}
@@ -406,6 +406,15 @@
       updateCheckState();
     }
 
+    function clearHeroSelections(){
+      selections = [null, null];
+      heroChoiceEls.forEach(el => el.textContent = '?');
+      pad.querySelectorAll('.key').forEach(btn => {
+        delete btn.dataset.hero0;
+        delete btn.dataset.hero1;
+      });
+    }
+
     function setActiveHero(index){
       activeHero = index;
       heroButtons.forEach(btn => btn.classList.toggle('active', Number(btn.dataset.hero) === index));
@@ -461,6 +470,7 @@
         updateCheckState();
         return;
       }
+      clearHeroSelections();
       const op = operations[ri(0, operations.length-1)];
       const data = op.generate();
       challenge = {
@@ -483,12 +493,8 @@
     }
 
     function resetGame(){
-      selections = [null, null];
+      clearHeroSelections();
       challenge = null;
-      pad.querySelectorAll('.key').forEach(btn => {
-        delete btn.dataset.hero0;
-        delete btn.dataset.hero1;
-      });
       score = 0;
       mistakes = 0;
       completed = 0;
@@ -496,16 +502,13 @@
       mistakesBadge.textContent = 'Błędy: 0';
       progressBar.style.width = '0%';
       setActiveHero(0);
-      moveHeroToDigit(0, 4);
-      moveHeroToDigit(1, 6);
       showFeedback('Nowa misja! Dopasuj cyfry i sprawdź wynik.', 'info');
       newChallenge();
     }
 
     // start
+    clearHeroSelections();
     setActiveHero(0);
-    moveHeroToDigit(0, 4);
-    moveHeroToDigit(1, 6);
     newChallenge();
 
   </script>
