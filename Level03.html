@@ -24,7 +24,9 @@
       background: radial-gradient(1200px 800px at 70% -10%, #1b2a4b 0%, var(--bg) 60%),
                   radial-gradient(900px 600px at -10% 110%, #12203a 0%, var(--bg) 60%);
       color:var(--text);
-      overflow:hidden;
+      overflow-x:hidden;
+      overflow-y:auto;
+      -webkit-overflow-scrolling:touch;
     }
     .stars{position:fixed; inset:0; pointer-events:none; z-index:-1}
     .star{position:absolute; width:2px; height:2px; background:var(--star); opacity:.8; border-radius:50%; animation:twinkle 2.5s infinite ease-in-out}
