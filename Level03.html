@@ -58,6 +58,11 @@
 
     .equation{display:flex; gap:10px; align-items:center; font-size: clamp(22px, 5vw, 32px); font-weight:700; justify-content:center; padding:12px; border-radius:12px; background:#0c1834; border:1px solid rgba(255,255,255,.08)}
     .equation .slot{min-width:44px; text-align:center}
+    .equation .heroSlot{position:relative}
+    .equation .heroSlot[data-empty="true"]{color:transparent}
+    .equation .heroSlot[data-empty="true"]::before{content:''; display:block; width:clamp(34px, 10vw, 44px); height:clamp(34px, 10vw, 44px); margin:0 auto; background-size:cover; background-position:center; border-radius:50%; box-shadow:0 6px 16px rgba(0,0,0,.35)}
+    .equation .heroSlot[data-empty="true"][data-hero-slot="0"]::before{background-image:var(--hero0)}
+    .equation .heroSlot[data-empty="true"][data-hero-slot="1"]::before{background-image:var(--hero1)}
     .equation .result{color:var(--accent)}
 
     .operationInfo{background:#0a1428; border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px 12px; line-height:1.4}
@@ -165,9 +170,9 @@
       </div>
 
       <div class="equation" aria-live="polite">
-        <span class="slot" id="eqA">?</span>
+        <span class="slot heroSlot" id="eqA" data-hero-slot="0" data-empty="true" aria-label="Cyfra pierwszego bohatera"></span>
         <span class="slot" id="eqOp">+</span>
-        <span class="slot" id="eqB">?</span>
+        <span class="slot heroSlot" id="eqB" data-hero-slot="1" data-empty="true" aria-label="Cyfra drugiego bohatera"></span>
         <span class="slot">=</span>
         <span class="slot result" id="eqResult">0</span>
       </div>
@@ -245,7 +250,7 @@
       small.className = 'small';
       small.textContent = 'Cyfra: ';
       const value = document.createElement('span');
-      value.textContent = '?';
+      value.textContent = '—';
       small.appendChild(value);
       meta.appendChild(small);
       btn.appendChild(meta);
@@ -430,7 +435,7 @@
 
     function clearHeroSelections(){
       selections = [null, null];
-      heroChoiceEls.forEach(el => el.textContent = '?');
+      heroChoiceEls.forEach(el => el.textContent = '—');
       pad.querySelectorAll('.key').forEach(btn => {
         delete btn.dataset.hero0;
         delete btn.dataset.hero1;
@@ -447,10 +452,27 @@
     }
 
     function updateEquation(){
-      eqA.textContent = selections[0] !== null ? selections[0] : '?';
-      eqB.textContent = selections[1] !== null ? selections[1] : '?';
+      setHeroSlot(eqA, selections[0], HERO_NAME);
+      setHeroSlot(eqB, selections[1], SIDEKICK_NAME);
       eqOp.textContent = challenge ? challenge.display : '?';
       eqResult.textContent = challenge ? formatValue(challenge.target) : '?';
+    }
+
+    function setHeroSlot(slotEl, value, heroName){
+      if(!slotEl) return;
+      if(value === null){
+        slotEl.dataset.empty = 'true';
+        slotEl.textContent = '';
+        if(heroName){
+          slotEl.setAttribute('aria-label', `${heroName} czeka na cyfrę`);
+        }
+      } else {
+        slotEl.dataset.empty = 'false';
+        slotEl.textContent = value;
+        if(heroName){
+          slotEl.setAttribute('aria-label', `${heroName} ustawiony na cyfrę ${value}`);
+        }
+      }
     }
 
     function updateCheckState(){
@@ -482,8 +504,37 @@
       return Math.floor(Math.random()*(max-min+1))+min;
     }
 
+    function generateSolvableChallenge(){
+      const maxAttempts = 200;
+      for(let attempt = 0; attempt < maxAttempts; attempt++){
+        const op = operations[ri(0, operations.length-1)];
+        const data = op.generate();
+        if(isSolvable(op, data.target)){
+          return {op, data};
+        }
+      }
+      const fallbackOp = operations.find(op => op.key === '+') || operations[0];
+      return {op: fallbackOp, data: {target: 0}};
+    }
+
+    function isSolvable(op, target){
+      for(let a=0; a<=9; a++){
+        for(let b=0; b<=9; b++){
+          if(op.key === '/' && b === 0) continue;
+          const value = op.apply(a,b);
+          if(Number.isFinite(value) && Math.abs(value - target) < 1e-9){
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
     function newChallenge(){
       if(completed >= totalRounds){
+        clearHeroSelections();
+        setHeroSlot(eqA, null, HERO_NAME);
+        setHeroSlot(eqB, null, SIDEKICK_NAME);
         roundBadge.textContent = `Zadanie ${totalRounds}/${totalRounds}`;
         operationNameEl.textContent = 'Misja zakończona';
         targetValueEl.textContent = '—';
@@ -497,8 +548,7 @@
         return;
       }
       clearHeroSelections();
-      const op = operations[ri(0, operations.length-1)];
-      const data = op.generate();
+      const {op, data} = generateSolvableChallenge();
       challenge = {
         key: op.key,
         display: op.display,
