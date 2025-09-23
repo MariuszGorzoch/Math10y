@@ -164,11 +164,6 @@
       <div class="qtitle">Cel misji</div>
       <div class="question" id="question">Twoim zadaniem jest dobrać cyfry, aby rozwiązanie było poprawne.</div>
 
-      <div class="operationTag small" aria-live="polite">
-        <span>Operacja: <strong id="operationName">Dodawanie (+)</strong></span>
-        <span>Cel: <strong id="targetValue">0</strong></span>
-      </div>
-
       <div class="equation" aria-live="polite">
         <span class="slot heroSlot" id="eqA" data-hero-slot="0" data-empty="true" aria-label="Cyfra pierwszego bohatera"></span>
         <span class="slot" id="eqOp">+</span>
@@ -280,8 +275,6 @@
     const mistakesBadge = document.getElementById('mistakesBadge');
     const progressBar = document.getElementById('progressBar');
     const questionEl = document.getElementById('question');
-    const operationNameEl = document.getElementById('operationName');
-    const targetValueEl = document.getElementById('targetValue');
     const operationInfoEl = document.getElementById('operationInfo');
     const feedbackEl = document.getElementById('feedback');
     const checkBtn = document.getElementById('checkBtn');
@@ -320,7 +313,7 @@
         display: '-',
         name: 'Odejmowanie',
         verb: 'odjąć',
-        description: 'Odejmij drugą cyfrę od pierwszej, aby uzyskać różnicę.',
+        description: '',
         generate(){
           const a = ri(0,9);
           const b = ri(0,a);
@@ -536,8 +529,6 @@
         setHeroSlot(eqA, null, HERO_NAME);
         setHeroSlot(eqB, null, SIDEKICK_NAME);
         roundBadge.textContent = `Zadanie ${totalRounds}/${totalRounds}`;
-        operationNameEl.textContent = 'Misja zakończona';
-        targetValueEl.textContent = '—';
         operationInfoEl.textContent = `${HERO_NAME} i ${SIDEKICK_NAME} wykonali wszystkie zadania. Kliknij „Restart”, aby zagrać ponownie.`;
         questionEl.textContent = 'Świetna robota! Wszystkie portale liczbowe zostały otwarte.';
         eqOp.textContent = '✓';
@@ -559,8 +550,6 @@
         apply: op.apply
       };
       questionEl.textContent = `Które dwie cyfry należy ${op.verb}, aby wynik był równy ${formatValue(challenge.target)}?`;
-      operationNameEl.textContent = `${op.name} (${op.key})`;
-      targetValueEl.textContent = formatValue(challenge.target);
       operationInfoEl.textContent = op.description;
       roundBadge.textContent = `Zadanie ${completed + 1}/${totalRounds}`;
       showFeedback('Przesuń bohaterów i naciśnij CHECK, aby sprawdzić rozwiązanie.', 'info');
